@@ -163,11 +163,29 @@ Example:
 
 ---
 
+
 ## Acknowledgements
 
-- Logitech G19 community
-- LibreHardwareMonitor
-- LibUsbDotNet
+G19ZVetro was originally built upon the excellent G19LCD project by Pontus Holmberg (endlessmind).
+
+Original project:
+https://github.com/endlessmind/G19LCD
+
+The original G19LCD library provided low-level USB communication with the Logitech G19 LCD display.
+
+G19ZVetro extends that foundation with:
+
+- Modern .NET 10 support
+- Real-time hardware telemetry
+- RTSS FPS monitoring
+- Multi-page dashboard system
+- Persistent settings
+- WPF configuration application
+- System tray integration
+- Windows startup integration
+- Enhanced menu navigation
+
+Many thanks to Pontus Holmberg for the original reverse-engineering and LCD communication work.
 
 ---
 
