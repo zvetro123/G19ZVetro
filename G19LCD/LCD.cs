@@ -40,7 +40,7 @@ namespace G19LCD
         private Thread buttonThread;
 
         public event Action<string> ButtonPressed;
-
+        
         /// <summary>
         /// Get or Set the current Page displayed on the screen
         /// </summary>
@@ -95,7 +95,6 @@ namespace G19LCD
         public LCD(int vid, int pid)
         {
             MyUsbFinder = new UsbDeviceFinder(vid, pid);
-
         }
 
         /// <summary>
@@ -105,30 +104,21 @@ namespace G19LCD
         {
             MyUsbDevice = UsbDevice.OpenUsbDevice(MyUsbFinder);
 
-            if (MyUsbDevice == null) throw new Exception("Device Not Found.");
-            // If this is a "whole" usb device (libusb-win32, linux libusb)
-            // it will have an IUsbDevice interface. If not (WinUSB) the 
-            // variable will be null indicating this is an interface of a 
-            // device.
+            if (MyUsbDevice == null)
+                throw new Exception("Device Not Found.");
 
             wholeUsbDevice = MyUsbDevice as IUsbDevice;
 
-
-            if (!ReferenceEquals(wholeUsbDevice, null)) {
-                // This is a "whole" USB device. Before it can be used, 
-                // the desired configuration and interface must be selected.
-
-                // Select config #1
+            if (!ReferenceEquals(wholeUsbDevice, null))
+            {
                 wholeUsbDevice.SetConfiguration(1);
-                // Claim interface #0.
+
                 wholeUsbDevice.ClaimInterface(0);
             }
-            // open read endpoint 1.
+
             reader = MyUsbDevice.OpenEndpointReader(ReadEndpointID.Ep01);
-            // open write endpoint 1.
+
             writer = MyUsbDevice.OpenEndpointWriter(WriteEndpointID.Ep02);
-
-
         }
 
         public void StartButtonDebug()

@@ -1,8 +1,9 @@
 ﻿using G19LCD;
 using G19ZVetro.Rendering;
 using G19ZVetro.Telemetry;
-using System.Diagnostics;
 using System.Drawing;
+using System.Threading;
+using System.Windows;
 
 namespace G19ZVetro.Services;
 
@@ -12,245 +13,231 @@ public class G19Service
     {
         Task.Run(() =>
         {
-        var lcd = new G19LCD.LCD(1133, 49705);
+            try
+            {
+                var lcd = new G19LCD.LCD(1133, 49705);
 
-        lcd.OpenDevice();
-        lcd.StartButtonDebug();
+                lcd.OpenDevice();
+                lcd.StartButtonDebug();
 
-        var monitor = new HardwareMonitor();
+                var renderer = new DashboardRenderer();
+                var monitor = new HardwareMonitor();
 
-        var renderer = new DashboardRenderer();
+                var settings = SettingsManager.Load();
 
-        var rtss = new RtssMonitor();
+                int currentPage = 0;
+                const int pageCount = 4;
 
-        var appSettings = SettingsManager.Load();
+                bool inMenu = false;
 
-        int refreshRate =
-            appSettings.RefreshRate;
+                bool inSettingsMenu = false;
+                bool inAboutScreen = false;
 
-        int currentPage = 0;
-        const int pageCount = 5;
+                string[] settingsItems =
+                {
+                "Refresh Rate",
+                "About"
+                };
 
-        bool inMenu = false;
-        bool inAboutScreen = false;
+                int settingsIndex = 0;
 
-        string[] menuItems =
-        {
+                string[] menuItems =
+                {
                 "Dashboard",
                 "Hardware",
                 "Memory",
                 "Performance",
                 "Settings"
-            };
+                };
 
-        bool inSettingsMenu = false;
+                int menuIndex = 0;
 
-        string[] settingsItems =
-        {
-                "Refresh Rate",
-                "About"
-            };
+                lcd.ButtonPressed += button =>
+                {
+                    switch (button)
+                    {
+                        case "BTN_MENU":
+                            inMenu = true;
+                            break;
 
-        int settingsIndex = 0;
-        int menuIndex = 0;
+                        case "BTN_SETTINGS":
+                            inMenu = false;
+                            inAboutScreen = false;
+                            inSettingsMenu = true;
+                            settingsIndex = 0;
+                            break;
 
-        lcd.ButtonPressed += button =>
-        {
-            switch (button)
-            {
-                case "BTN_LEFT":
-                    currentPage--;
+                        case "BTN_BACK":
 
-                    if (currentPage < 0)
-                        currentPage = pageCount - 1;
+                            if (inAboutScreen)
+                            {
+                                inAboutScreen = false;
+                                inSettingsMenu = true;
+                            }
+                            else if (inSettingsMenu)
+                            {
+                                inSettingsMenu = false;
+                                currentPage = 0;
+                            }
+                            else
+                            {
+                                inMenu = false;
+                                currentPage = 0;
+                            }
 
-                    Console.WriteLine("Page: " + currentPage);
-                    break;
+                            break;
 
-                case "BTN_RIGHT":
-                    currentPage++;
+                        case "BTN_UP":
+                            if (inSettingsMenu)
+                            {
+                                settingsIndex--;
 
-                    if (currentPage >= pageCount)
-                        currentPage = 0;
+                                if (settingsIndex < 0)
+                                    settingsIndex = settingsItems.Length - 1;
+                            }
+                            else if (inMenu)
+                            {
+                                menuIndex--;
 
-                    Console.WriteLine("Page: " + currentPage);
-                    break;
+                                if (menuIndex < 0)
+                                    menuIndex = menuItems.Length - 1;
+                            }
+                            break;
 
-                case "BTN_MENU":
-                    inMenu = true;
-                    break;
+                        case "BTN_DOWN":
+                            if (inSettingsMenu)
+                            {
+                                settingsIndex++;
 
-                case "BTN_BACK":
+                                if (settingsIndex >= settingsItems.Length)
+                                    settingsIndex = 0;
+                            }
+                            else if (inMenu)
+                            {
+                                menuIndex++;
+
+                                if (menuIndex >= menuItems.Length)
+                                    menuIndex = 0;
+                            }
+                            break;
+
+                        case "BTN_OK":
+                            if (inSettingsMenu)
+                            {
+                                switch (settingsIndex)
+                                {
+                                    case 0:
+                                        settings.RefreshRate =
+                                            settings.RefreshRate == 250
+                                                ? 500
+                                                : settings.RefreshRate == 500
+                                                    ? 1000
+                                                    : 250;
+
+                                        SettingsManager.Save(settings);
+                                        break;
+
+                                    case 1:
+                                        inSettingsMenu = false;
+                                        inAboutScreen = true;
+                                        break;
+                                }
+                            }
+                            else if (inMenu)
+                            {
+                                if (menuIndex == 4)
+                                {
+                                    inSettingsMenu = true;
+                                    settingsIndex = 0;
+                                }
+                                else
+                                {
+                                    currentPage = menuIndex;
+                                }
+
+                                inMenu = false;
+                            }
+                            break;
+
+                        case "BTN_LEFT":
+                            if (!inMenu && !inSettingsMenu && !inAboutScreen)
+                            {
+                                currentPage--;
+
+                                if (currentPage < 0)
+                                    currentPage = pageCount - 1;
+                            }
+                            break;
+
+                        case "BTN_RIGHT":
+                            if (!inMenu && !inSettingsMenu && !inAboutScreen)
+                            {
+                                currentPage++;
+
+                                if (currentPage >= pageCount)
+                                    currentPage = 0;
+                            }
+                            break;
+                    }
+                };
+
+                while (true)
+                {
+                    var stats = monitor.GetStats();
+
+                    Bitmap dashboard;
 
                     if (inAboutScreen)
                     {
-                        inAboutScreen = false;
-                        inSettingsMenu = true;
+                        dashboard = renderer.RenderAboutPage();
                     }
                     else if (inSettingsMenu)
                     {
-                        inSettingsMenu = false;
-                        currentPage = 0;
+                        dashboard = renderer.RenderSettingsMenu(
+                            settingsItems,
+                            settingsIndex,
+                            settings.RefreshRate);
+                    }
+                    else if (inMenu)
+                    {
+                        dashboard = renderer.RenderMenu(
+                            menuItems,
+                            menuIndex);
                     }
                     else
                     {
-                        inMenu = false;
-                        currentPage = 0;
-                    }
-
-                    break;
-
-                case "BTN_UP":
-
-                    if (inSettingsMenu)
-                    {
-                        settingsIndex--;
-
-                        if (settingsIndex < 0)
-                            settingsIndex = settingsItems.Length - 1;
-                    }
-                    else if (inMenu)
-                    {
-                        menuIndex--;
-
-                        if (menuIndex < 0)
-                            menuIndex = menuItems.Length - 1;
-                    }
-                    break;
-
-                case "BTN_DOWN":
-
-                    if (inSettingsMenu)
-                    {
-                        settingsIndex++;
-
-                        if (settingsIndex >= settingsItems.Length)
-                            settingsIndex = 0;
-                    }
-                    else if (inMenu)
-                    {
-                        menuIndex++;
-
-                        if (menuIndex >= menuItems.Length)
-                            menuIndex = 0;
-                    }
-                    break;
-
-                case "BTN_OK":
-
-                    if (inSettingsMenu)
-                    {
-                        switch (settingsIndex)
+                        switch (currentPage)
                         {
-                            case 0: // Refresh Rate
-
-                                refreshRate =
-                                    refreshRate == 250
-                                        ? 500
-                                        : refreshRate == 500
-                                            ? 1000
-                                            : 250;
-
-                                appSettings.RefreshRate =
-                                    refreshRate;
-
-                                SettingsManager.Save(
-                                    appSettings);
-
+                            case 1:
+                                dashboard = renderer.RenderHardwarePage(stats);
                                 break;
 
-                            case 1: // About
+                            case 2:
+                                dashboard = renderer.RenderMemoryPage(stats);
+                                break;
 
-                                inAboutScreen = true;
+                            case 3:
+                                dashboard = renderer.RenderPerformancePage(stats);
+                                break;
 
+                            default:
+                                dashboard = renderer.RenderDashboardPage(stats);
                                 break;
                         }
                     }
-                    else if (inMenu)
-                    {
-                        currentPage = menuIndex;
-                        inMenu = false;
 
-                        if (currentPage == 4)
-                        {
-                            inSettingsMenu = true;
-                            settingsIndex = 0;
-                        }
-                    }
+                    lcd.UpdateScreen(dashboard);
 
-                    break;
-
-                case "BTN_SETTINGS":
-                    currentPage = 4;
-                    inMenu = false;
-                    inSettingsMenu = true;
-                    settingsIndex = 0;
-                    break;
-            }
-        };
-        while (true)
-        {
-            var stats = monitor.GetStats();
-
-            stats.Fps = rtss.GetFps();
-
-            Bitmap dashboard;
-
-            if (inAboutScreen)
-            {
-                dashboard = renderer.RenderAboutPage();
-            }
-            else if (inSettingsMenu)
-            {
-                dashboard =
-                renderer.RenderSettingsMenu(
-                    settingsItems,
-                    settingsIndex,
-                    refreshRate);
-            }
-            else if (inMenu)
-            {
-                dashboard =
-                    renderer.RenderMenu(
-                        menuItems,
-                        menuIndex);
-            }
-            else
-            {
-                switch (currentPage)
-                {
-                    case 1:
-                        dashboard = renderer.RenderHardwarePage(stats);
-                        break;
-
-                    case 2:
-                        dashboard = renderer.RenderMemoryPage(stats);
-                        break;
-
-                    case 3:
-                        dashboard = renderer.RenderPerformancePage(stats);
-                        break;
-
-                    case 4:
-                        dashboard = renderer.RenderSettingsPage();
-                        break;
-
-                    default:
-                        dashboard = renderer.RenderDashboardPage(stats);
-                        break;
+                    settings = SettingsManager.Load();
+                    Thread.Sleep(settings.RefreshRate);
                 }
             }
-
-            // dashboard.Save("dashboard.png");
-
-            var sw = Stopwatch.StartNew();
-
-            lcd.UpdateScreen(dashboard);
-
-            sw.Stop();
-
-            Thread.Sleep(refreshRate);
-        }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    ex.ToString(),
+                    "G19Service Error");
+            }
         });
     }
 }
