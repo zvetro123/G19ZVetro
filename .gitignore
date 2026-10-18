@@ -1,15 +1,12 @@
-﻿# Visual Studio
-.vs/
+﻿.vs/
 
-# Build output
 bin/
 obj/
 
-# User files
+Publish/
+
 *.user
 *.suo
-
-# Logs
 *.log
 
 packages/
