@@ -11,3 +11,5 @@ obj/
 
 # Logs
 *.log
+
+packages/

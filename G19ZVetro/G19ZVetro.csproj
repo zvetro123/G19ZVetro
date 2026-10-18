@@ -1,20 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<OutputType>Exe</OutputType>
 		<TargetFramework>net10.0-windows</TargetFramework>
 		<UseWPF>true</UseWPF>
+
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
-		<PackageReference Include="SkiaSharp" Version="4.153.1" />
+		<ProjectReference Include="..\G19LCD\G19LCD.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\G19LCD\G19LCD.csproj" />
+		<PackageReference Include="LibreHardwareMonitorLib"
+                          Version="0.9.6" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="LibUsbDotNet">
+			<HintPath>..\LibUsbDotNet.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 </Project>

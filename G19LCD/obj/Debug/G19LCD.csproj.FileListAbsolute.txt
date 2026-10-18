@@ -18,3 +18,10 @@ C:\Users\zvetr\source\repos\endlessmind\G19LCD\G19LCD\obj\Debug\G19LCD.csproj.Co
 C:\Users\zvetr\source\repos\endlessmind\G19LCD\G19LCD\obj\Debug\G19LCD.csproj.Up2Date
 C:\Users\zvetr\source\repos\endlessmind\G19LCD\G19LCD\obj\Debug\G19LCD.dll
 C:\Users\zvetr\source\repos\endlessmind\G19LCD\G19LCD\obj\Debug\G19LCD.pdb
+C:\Users\zvetr\source\repos\G19ZVetro\G19LCD\bin\Debug\G19LCD.dll
+C:\Users\zvetr\source\repos\G19ZVetro\G19LCD\bin\Debug\G19LCD.pdb
+C:\Users\zvetr\source\repos\G19ZVetro\G19LCD\obj\Debug\G19LCD.csproj.AssemblyReference.cache
+C:\Users\zvetr\source\repos\G19ZVetro\G19LCD\obj\Debug\G19LCD.csproj.CoreCompileInputs.cache
+C:\Users\zvetr\source\repos\G19ZVetro\G19LCD\obj\Debug\G19LCD.csproj.Up2Date
+C:\Users\zvetr\source\repos\G19ZVetro\G19LCD\obj\Debug\G19LCD.dll
+C:\Users\zvetr\source\repos\G19ZVetro\G19LCD\obj\Debug\G19LCD.pdb
