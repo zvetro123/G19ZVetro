@@ -6,9 +6,11 @@ namespace G19ZVetro.Telemetry;
 public class HardwareMonitor
 {
     private readonly Computer _computer;
-
+    private readonly RtssMonitor _rtss;
     public HardwareMonitor()
     {
+        _rtss = new RtssMonitor();
+
         _computer = new Computer
         {
             IsCpuEnabled = true,
@@ -95,6 +97,8 @@ public class HardwareMonitor
         }
 
         stats.RamTotalGb = 32;
+
+        stats.Fps = _rtss.GetFps();
 
         return stats;
     }
