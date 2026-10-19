@@ -6,7 +6,14 @@ namespace G19ZVetro;
 
 public static class SettingsManager
 {
-    private const string FileName = "settings.json";
+    private static readonly string SettingsDirectory =
+        Path.Combine(
+            Environment.GetFolderPath(
+                Environment.SpecialFolder.LocalApplicationData),
+            "G19ZVetro");
+
+    private static readonly string FileName =
+        Path.Combine(SettingsDirectory, "settings.json");
 
     public static AppSettings Load()
     {
@@ -28,6 +35,8 @@ public static class SettingsManager
 
     public static void Save(AppSettings settings)
     {
+        Directory.CreateDirectory(SettingsDirectory);
+
         string json =
             JsonSerializer.Serialize(
                 settings,
