@@ -115,16 +115,16 @@ namespace G19LCD
             if (!ReferenceEquals(wholeUsbDevice, null))
             {
                 wholeUsbDevice.SetConfiguration(1);
-
                 wholeUsbDevice.ClaimInterface(0);
             }
 
             reader = MyUsbDevice.OpenEndpointReader(ReadEndpointID.Ep01);
-
             writer = MyUsbDevice.OpenEndpointWriter(WriteEndpointID.Ep02);
+
+            StartButtonListener();
         }
 
-        public void StartButtonDebug()
+        public void StartButtonListener()
         {
             if (buttonThread != null)
                 return;
@@ -186,14 +186,11 @@ namespace G19LCD
 
                     Array.Clear(buffer, 0, buffer.Length);
 
-                    ErrorCode result =
-                        reader.Read(
-                            buffer,
-                            250,
-                            out transferred);
+                    reader.Read(
+                        buffer,
+                        250,
+                        out transferred);
 
-                    // G19 button state appears in buffer[0] even when
-                    // LibUsbDotNet reports IoTimedOut.
                     if (buffer[0] != 0)
                     {
                         HandleButton(buffer);

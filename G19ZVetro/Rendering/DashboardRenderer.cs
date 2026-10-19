@@ -549,7 +549,7 @@ public class DashboardRenderer
             70);
 
         g.DrawString(
-            "Version 1.0",
+            "Version 1.1",
             valueFont,
             Brushes.White,
             10,

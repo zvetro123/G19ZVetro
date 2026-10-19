@@ -57,8 +57,6 @@ public class G19Service
 
                     SetConnectionState(true);
 
-                    // lcd.StartButtonDebug();
-
                     RunDisplayLoop(lcd);
                 }
                 catch (Exception)
@@ -112,7 +110,6 @@ public class G19Service
         };
 
         int menuIndex = 0;
-
         lcd.ButtonPressed += button =>
         {
             switch (button)
