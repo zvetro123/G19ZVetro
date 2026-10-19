@@ -87,6 +87,7 @@ public class G19Service
 
         int currentPage = 0;
         const int pageCount = 4;
+        const int profileCount = 3;
 
         bool inMenu = false;
         bool inSettingsMenu = false;
@@ -101,13 +102,17 @@ public class G19Service
         };
         int settingsIndex = 0;
 
-        string[] profileItems =
+        string[] GetProfileItems()
         {
-            "M1 - Development",
-            "M2 - Gaming",
-            "M3 - Streaming"
-        };
+            settings = SettingsManager.Load();
 
+            return new[]
+            {
+                $"M1 - {settings.Profiles["M1"].Name}",
+                $"M2 - {settings.Profiles["M2"].Name}",
+                $"M3 - {settings.Profiles["M3"].Name}"
+            };
+        }
         int profileIndex = 0;
 
         string[] menuItems =
@@ -167,7 +172,7 @@ public class G19Service
                         profileIndex--;
 
                         if (profileIndex < 0)
-                            profileIndex = profileItems.Length - 1;
+                            profileIndex = profileCount - 1;
                     }
                     else if (inSettingsMenu)
                     {
@@ -191,7 +196,7 @@ public class G19Service
                     {
                         profileIndex++;
 
-                        if (profileIndex >= profileItems.Length)
+                        if (profileIndex >= profileCount)
                             profileIndex = 0;
                     }
                     else if (inSettingsMenu)
@@ -229,6 +234,13 @@ public class G19Service
                         }
 
                         settings = SettingsManager.Load();
+
+                        profileIndex = settings.ActiveProfile switch
+                        {
+                            "M2" => 1,
+                            "M3" => 2,
+                            _ => 0
+                        };
                     }
                     else if (inSettingsMenu)
                     {
@@ -281,7 +293,10 @@ public class G19Service
                     break;
 
                 case "BTN_LEFT":
-                    if (!inMenu && !inSettingsMenu && !inAboutScreen)
+                    if (!inMenu &&
+                        !inSettingsMenu &&
+                        !inAboutScreen &&
+                        !inProfilesMenu)
                     {
                         currentPage--;
 
@@ -291,7 +306,10 @@ public class G19Service
                     break;
 
                 case "BTN_RIGHT":
-                    if (!inMenu && !inSettingsMenu && !inAboutScreen)
+                    if (!inMenu &&
+                        !inSettingsMenu &&
+                        !inAboutScreen &&
+                        !inProfilesMenu)
                     {
                         currentPage++;
 
@@ -311,7 +329,7 @@ public class G19Service
             if (inProfilesMenu)
             {
                 dashboard = renderer.RenderMenu(
-                    profileItems,
+                    GetProfileItems(),
                     profileIndex);
             }
             else if (inAboutScreen)
