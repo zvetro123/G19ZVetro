@@ -91,14 +91,24 @@ public class G19Service
         bool inMenu = false;
         bool inSettingsMenu = false;
         bool inAboutScreen = false;
+        bool inProfilesMenu = false;
 
         string[] settingsItems =
         {
             "Refresh Rate",
+            "Profiles",
             "About"
         };
-
         int settingsIndex = 0;
+
+        string[] profileItems =
+        {
+            "M1 - Development",
+            "M2 - Gaming",
+            "M3 - Streaming"
+        };
+
+        int profileIndex = 0;
 
         string[] menuItems =
         {
@@ -127,7 +137,12 @@ public class G19Service
 
                 case "BTN_BACK":
 
-                    if (inAboutScreen)
+                    if (inProfilesMenu)
+                    {
+                        inProfilesMenu = false;
+                        inSettingsMenu = true;
+                    }
+                    else if (inAboutScreen)
                     {
                         inAboutScreen = false;
                         inSettingsMenu = true;
@@ -146,7 +161,15 @@ public class G19Service
                     break;
 
                 case "BTN_UP":
-                    if (inSettingsMenu)
+
+                    if (inProfilesMenu)
+                    {
+                        profileIndex--;
+
+                        if (profileIndex < 0)
+                            profileIndex = profileItems.Length - 1;
+                    }
+                    else if (inSettingsMenu)
                     {
                         settingsIndex--;
 
@@ -163,7 +186,15 @@ public class G19Service
                     break;
 
                 case "BTN_DOWN":
-                    if (inSettingsMenu)
+
+                    if (inProfilesMenu)
+                    {
+                        profileIndex++;
+
+                        if (profileIndex >= profileItems.Length)
+                            profileIndex = 0;
+                    }
+                    else if (inSettingsMenu)
                     {
                         settingsIndex++;
 
@@ -180,7 +211,26 @@ public class G19Service
                     break;
 
                 case "BTN_OK":
-                    if (inSettingsMenu)
+                    if (inProfilesMenu)
+                    {
+                        switch (profileIndex)
+                        {
+                            case 0:
+                                ProfileManager.SetActiveProfile("M1");
+                                break;
+
+                            case 1:
+                                ProfileManager.SetActiveProfile("M2");
+                                break;
+
+                            case 2:
+                                ProfileManager.SetActiveProfile("M3");
+                                break;
+                        }
+
+                        settings = SettingsManager.Load();
+                    }
+                    else if (inSettingsMenu)
                     {
                         switch (settingsIndex)
                         {
@@ -196,6 +246,19 @@ public class G19Service
                                 break;
 
                             case 1:
+                                inSettingsMenu = false;
+                                inProfilesMenu = true;
+
+                                profileIndex = settings.ActiveProfile switch
+                                {
+                                    "M2" => 1,
+                                    "M3" => 2,
+                                    _ => 0
+                                };
+
+                                break;
+
+                            case 2:
                                 inSettingsMenu = false;
                                 inAboutScreen = true;
                                 break;
@@ -245,7 +308,13 @@ public class G19Service
 
             Bitmap dashboard;
 
-            if (inAboutScreen)
+            if (inProfilesMenu)
+            {
+                dashboard = renderer.RenderMenu(
+                    profileItems,
+                    profileIndex);
+            }
+            else if (inAboutScreen)
             {
                 dashboard = renderer.RenderAboutPage();
             }
