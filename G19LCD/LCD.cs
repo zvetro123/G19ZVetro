@@ -20,7 +20,8 @@ namespace G19LCD
         ErrorCode ec = ErrorCode.None;
         IUsbDevice wholeUsbDevice;
 
-        public static UsbDevice MyUsbDevice;
+        private UsbDevice MyUsbDevice;
+        
         public UsbDeviceFinder MyUsbFinder;
 
         private int cPageIndex;
@@ -38,6 +39,8 @@ namespace G19LCD
         // Lock to serialize access to the USB writer
         private readonly object writerLock = new object();
         private Thread buttonThread;
+
+        private bool shuttingDown;
 
         public event Action<string> ButtonPressed;
         
@@ -126,6 +129,8 @@ namespace G19LCD
             if (buttonThread != null)
                 return;
 
+            shuttingDown = false;
+
             buttonThread = new Thread(ButtonDebugLoop);
             buttonThread.IsBackground = true;
             buttonThread.Start();
@@ -175,7 +180,7 @@ namespace G19LCD
             {
                 byte[] buffer = new byte[32];
 
-                while (true)
+                while (!shuttingDown)
                 {
                     int transferred = 0;
 
@@ -195,6 +200,10 @@ namespace G19LCD
                     }
                 }
             }
+            catch (ObjectDisposedException)
+            {
+                return;
+            }
             catch (Exception ex)
             {
                 Console.WriteLine(
@@ -208,27 +217,73 @@ namespace G19LCD
         /// </summary>
         public void CloseDevice()
         {
-            if (MyUsbDevice != null)
+            Debug.WriteLine("[LCD] CloseDevice() called");
+
+            shuttingDown = true;
+
+            if (buttonThread != null &&
+                buttonThread.IsAlive)
             {
-                if (MyUsbDevice.IsOpen) {
-                    // If this is a "whole" usb device (libusb-win32, linux libusb-1.0)
-                    // it exposes an IUsbDevice interface. If not (WinUSB) the 
-                    // 'wholeUsbDevice' variable will be null indicating this is 
-                    // an interface of a device; it does not require or support 
-                    // configuration and interface selection.
-                    IUsbDevice wholeUsbDevice = MyUsbDevice as IUsbDevice;
-                    if (!ReferenceEquals(wholeUsbDevice, null)) {
-                        // Release interface #0.
-                        wholeUsbDevice.ReleaseInterface(0);
-                    }
-                    MyUsbDevice.Close();
+                try
+                {
+                    Debug.WriteLine("[LCD] Waiting for button thread...");
+
+                    buttonThread.Join(1000);
+
+                    Debug.WriteLine("[LCD] Button thread exited");
                 }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(
+                        $"[LCD] buttonThread.Join failed: {ex}");
+                }
+            }
+
+            try
+            {
+                if (MyUsbDevice != null)
+                {
+                    if (MyUsbDevice.IsOpen)
+                    {
+                        if (wholeUsbDevice != null)
+                        {
+                            try
+                            {
+                                wholeUsbDevice.ReleaseInterface(0);
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(
+                                    $"[LCD] ReleaseInterface failed: {ex}");
+                            }
+                        }
+
+                        Debug.WriteLine("[LCD] Closing USB device");
+
+                        MyUsbDevice.Close();
+
+                        Debug.WriteLine("[LCD] USB device closed");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(
+                    $"[LCD] CloseDevice exception: {ex}");
+            }
+            finally
+            {
+                reader = null;
+                writer = null;
+                wholeUsbDevice = null;
                 MyUsbDevice = null;
-                // Free usb resources
-                UsbDevice.Exit();
+                buttonThread = null;
+
+                Debug.WriteLine("[LCD] Skipping UsbDevice.Exit()");
+
+                Debug.WriteLine("[LCD] CloseDevice() completed");
             }
         }
-
         public void UpdatePage()
         {
             LcdPage pg = Pages[CurrentPageIndex];

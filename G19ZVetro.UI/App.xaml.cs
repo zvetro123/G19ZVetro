@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using G19ZVetro.Services;
@@ -9,13 +10,24 @@ namespace G19ZVetro.UI
     {
         private readonly G19Service _service = new();
 
+        public G19Service Service => _service;
+
         public App()
         {
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
-                System.Windows.MessageBox.Show(
-                    e.ExceptionObject?.ToString() ?? "Unknown exception",
-                    "UNHANDLED EXCEPTION");
+                var ex = e.ExceptionObject as Exception;
+
+                System.Diagnostics.Debug.WriteLine(
+                    $"UNHANDLED EXCEPTION: {ex}");
+            };
+
+            TaskScheduler.UnobservedTaskException += (s, e) =>
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    $"UNOBSERVED TASK EXCEPTION: {e.Exception}");
+
+                e.SetObserved();
             };
         }
 
