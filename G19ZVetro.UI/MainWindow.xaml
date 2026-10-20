@@ -43,19 +43,52 @@
 
         <TextBlock Text="M1 Name"/>
         <TextBox
-    x:Name="M1NameBox"
-    Margin="0,2,0,10"/>
+            x:Name="M1NameBox"
+            Margin="0,2,0,5"/>
+
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="R" VerticalAlignment="Center"/>
+            <TextBox x:Name="M1RedBox" Width="40" Margin="5,0,10,0"/>
+
+            <TextBlock Text="G" VerticalAlignment="Center"/>
+            <TextBox x:Name="M1GreenBox" Width="40" Margin="5,0,10,0"/>
+
+            <TextBlock Text="B" VerticalAlignment="Center"/>
+            <TextBox x:Name="M1BlueBox" Width="40" Margin="5,0,0,0"/>
+        </StackPanel>
 
         <TextBlock Text="M2 Name"/>
         <TextBox
-    x:Name="M2NameBox"
-    Margin="0,2,0,10"/>
+            x:Name="M2NameBox"
+            Margin="0,2,0,5"/>
+
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="R" VerticalAlignment="Center"/>
+            <TextBox x:Name="M2RedBox" Width="40" Margin="5,0,10,0"/>
+
+            <TextBlock Text="G" VerticalAlignment="Center"/>
+            <TextBox x:Name="M2GreenBox" Width="40" Margin="5,0,10,0"/>
+
+            <TextBlock Text="B" VerticalAlignment="Center"/>
+            <TextBox x:Name="M2BlueBox" Width="40" Margin="5,0,0,0"/>
+        </StackPanel>
 
         <TextBlock Text="M3 Name"/>
         <TextBox
-    x:Name="M3NameBox"
-    Margin="0,2,0,10"/>
+            x:Name="M3NameBox"
+            Margin="0,2,0,5"/>
 
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="R" VerticalAlignment="Center"/>
+            <TextBox x:Name="M3RedBox" Width="40" Margin="5,0,10,0"/>
+
+            <TextBlock Text="G" VerticalAlignment="Center"/>
+            <TextBox x:Name="M3GreenBox" Width="40" Margin="5,0,10,0"/>
+
+            <TextBlock Text="B" VerticalAlignment="Center"/>
+            <TextBox x:Name="M3BlueBox" Width="40" Margin="5,0,0,0"/>
+        </StackPanel>
+        
         <Button
             Content="Save"
             Click="Save_Click"/>

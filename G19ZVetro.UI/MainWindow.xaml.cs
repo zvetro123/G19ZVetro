@@ -74,12 +74,38 @@ public partial class MainWindow : Window
 
         M1NameBox.Text =
             settings.Profiles["M1"].Name;
+        M1RedBox.Text =
+            settings.Profiles["M1"].Red.ToString();
+
+        M1GreenBox.Text =
+            settings.Profiles["M1"].Green.ToString();
+
+        M1BlueBox.Text =
+            settings.Profiles["M1"].Blue.ToString();
 
         M2NameBox.Text =
             settings.Profiles["M2"].Name;
 
+        M2RedBox.Text =
+            settings.Profiles["M2"].Red.ToString();
+
+        M2GreenBox.Text =
+            settings.Profiles["M2"].Green.ToString();
+
+        M2BlueBox.Text =
+            settings.Profiles["M2"].Blue.ToString();
+
         M3NameBox.Text =
             settings.Profiles["M3"].Name;
+
+        M3RedBox.Text =
+            settings.Profiles["M3"].Red.ToString();
+
+        M3GreenBox.Text =
+            settings.Profiles["M3"].Green.ToString();
+
+        M3BlueBox.Text =
+            settings.Profiles["M3"].Blue.ToString();
 
         foreach (ComboBoxItem item in RefreshRateBox.Items)
         {
@@ -189,6 +215,51 @@ public partial class MainWindow : Window
 
         settings.Profiles["M3"].Name =
             M3NameBox.Text;
+
+        int.TryParse(M1RedBox.Text, out var m1r);
+        int.TryParse(M1GreenBox.Text, out var m1g);
+        int.TryParse(M1BlueBox.Text, out var m1b);
+
+        settings.Profiles["M1"].Red =
+            Math.Clamp(m1r, 0, 255);
+        settings.Profiles["M1"].Green =
+            Math.Clamp(m1g, 0, 255);
+        settings.Profiles["M1"].Blue =
+            Math.Clamp(m1b, 0, 255);
+
+        int.TryParse(M2RedBox.Text, out var m2r);
+        int.TryParse(M2GreenBox.Text, out var m2g);
+        int.TryParse(M2BlueBox.Text, out var m2b);
+
+        settings.Profiles["M2"].Red =
+            Math.Clamp(m2r, 0, 255);
+        settings.Profiles["M2"].Green =
+            Math.Clamp(m2g, 0, 255);
+        settings.Profiles["M2"].Blue =
+            Math.Clamp(m2b, 0, 255);
+
+        int.TryParse(M3RedBox.Text, out var m3r);
+        int.TryParse(M3GreenBox.Text, out var m3g);
+        int.TryParse(M3BlueBox.Text, out var m3b);
+
+        settings.Profiles["M3"].Red =
+            Math.Clamp(m3r, 0, 255);
+        settings.Profiles["M3"].Green =
+            Math.Clamp(m3g, 0, 255);
+        settings.Profiles["M3"].Blue =
+            Math.Clamp(m3b, 0, 255);
+
+        M1RedBox.Text = settings.Profiles["M1"].Red.ToString();
+        M1GreenBox.Text = settings.Profiles["M1"].Green.ToString();
+        M1BlueBox.Text = settings.Profiles["M1"].Blue.ToString();
+
+        M2RedBox.Text = settings.Profiles["M2"].Red.ToString();
+        M2GreenBox.Text = settings.Profiles["M2"].Green.ToString();
+        M2BlueBox.Text = settings.Profiles["M2"].Blue.ToString();
+
+        M3RedBox.Text = settings.Profiles["M3"].Red.ToString();
+        M3GreenBox.Text = settings.Profiles["M3"].Green.ToString();
+        M3BlueBox.Text = settings.Profiles["M3"].Blue.ToString();
 
         SettingsManager.Save(settings);
 
