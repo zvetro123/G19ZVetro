@@ -1,4 +1,4 @@
-﻿namespace G19ZVetro.UI;
+﻿namespace G19ZVetro.Models;
 
 public enum G19ProfileButton : byte
 {
