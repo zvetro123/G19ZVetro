@@ -18,21 +18,7 @@ public partial class MainWindow : Window
     private G19Service service;
     private AppSettings settings;
     private Forms.NotifyIcon trayIcon;
-    private bool _macroRecording;
-    private string? _recordingTarget;
-    private readonly List<Key> _recordedKeys = new();
-    private void PlayMacro(List<string> keys)
-    {
-        Thread.Sleep(1000);
-
-        foreach (var key in keys)
-        {
-            Debug.WriteLine($"Replay: {key}");
-
-            Forms.SendKeys.SendWait(key);
-        }
-    }
-
+    private readonly MacroService _macroService = new();
     private void ProcessGKeyPacket(byte value)
     {
         switch (value)
@@ -181,41 +167,39 @@ public partial class MainWindow : Window
                                         break;
 
                                     case G19ProfileButton.MR:
-                                        _macroRecording = !_macroRecording;
 
-                                        if (_macroRecording)
+                                        if (!_macroService.IsRecording)
                                         {
+                                            _macroService.StartRecording();
+
                                             Debug.WriteLine(
                                                 "Macro recording enabled");
                                         }
                                         else
                                         {
-                                            if (_recordingTarget != null)
+                                            if (_macroService.RecordingTarget != null)
                                             {
                                                 settings = SettingsManager.Load();
 
                                                 var gKey =
-                                                    settings.Profiles[settings.ActiveProfile]
-                                                        .GKeys[_recordingTarget];
+                                                    settings.Profiles[
+                                                        settings.ActiveProfile]
+                                                        .GKeys[
+                                                            _macroService.RecordingTarget];
 
                                                 gKey.MacroKeys =
-                                                    _recordedKeys
-                                                        .Select(k => k.ToString())
-                                                        .ToList();
-                                                gKey.ActionType = "Recorded Macro";
+                                                    _macroService.EndRecording();
+
+                                                gKey.ActionType =
+                                                    "Recorded Macro";
+
                                                 gKey.Value = "";
 
                                                 SettingsManager.Save(settings);
 
                                                 Debug.WriteLine(
-                                                    $"Saved {_recordedKeys.Count} keys to {_recordingTarget}");
-
-                                                _recordingTarget = null;
+                                                    $"Saved {gKey.MacroKeys.Count} keys");
                                             }
-
-                                            Debug.WriteLine(
-                                                $"Macro recording disabled. " +
-                                                $"{_recordedKeys.Count} keys captured.");
                                         }
 
                                         break;
@@ -260,20 +244,20 @@ public partial class MainWindow : Window
     {
         base.OnKeyDown(e);
 
-        if (!_macroRecording ||
-            _recordingTarget == null)
+        if (!_macroService.IsRecording)
         {
             return;
         }
 
         var key = GetRealKey(e);
 
-        if (key >= Key.F1 && key <= Key.F24)
+        if (key >= Key.F1 &&
+            key <= Key.F24)
         {
             return;
         }
 
-        _recordedKeys.Add(key);
+        _macroService.CaptureKey(key);
 
         Debug.WriteLine(
             $"Captured: {key}");
@@ -550,16 +534,22 @@ public partial class MainWindow : Window
         Debug.WriteLine($"ExecuteGKey({gKeyName})");
         try
         {
-            if (_macroRecording)
+            if (_macroService.IsRecording &&
+                _macroService.RecordingTarget == null)
             {
-                _recordingTarget = gKeyName;
-                _recordedKeys.Clear();
+                _macroService.SetTarget(gKeyName);
 
                 Debug.WriteLine(
                     $"Recording macro for {gKeyName}");
 
                 return;
             }
+
+            if (_macroService.IsRecording)
+            {
+                return;
+            }
+
             settings = SettingsManager.Load();
 
             var profile =
@@ -577,7 +567,7 @@ public partial class MainWindow : Window
                 Debug.WriteLine(
                     $"Playing macro for {gKeyName}");
 
-                PlayMacro(gKey.MacroKeys);
+                _macroService.Play(gKey.MacroKeys);
 
                 return;
             }
