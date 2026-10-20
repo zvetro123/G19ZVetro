@@ -1,13 +1,14 @@
 ﻿using G19LCD.Pages;
 using G19LCD.Transactions;
 using LibUsbDotNet;
+using LibUsbDotNet.Info;
 using LibUsbDotNet.Main;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Diagnostics;
-using System.Windows.Media.Imaging;
+using System.Drawing;
 using System.Threading;
+using System.Windows.Media.Imaging;
 
 namespace G19LCD
 {
@@ -110,6 +111,8 @@ namespace G19LCD
             if (MyUsbDevice == null)
                 throw new Exception("Device Not Found.");
 
+            Debug.WriteLine("=== ALL USB DEVICES ===");
+
             foreach (UsbRegistry usbRegistry in UsbDevice.AllDevices)
             {
                 Debug.WriteLine(
@@ -122,7 +125,61 @@ namespace G19LCD
             if (!ReferenceEquals(wholeUsbDevice, null))
             {
                 wholeUsbDevice.SetConfiguration(1);
-                wholeUsbDevice.ClaimInterface(0);
+
+                Debug.WriteLine("=== CONFIG INFO ===");
+
+                foreach (UsbConfigInfo config in MyUsbDevice.Configs)
+                {
+                    Debug.WriteLine(
+                        $"Config {config.Descriptor.ConfigID}");
+
+                    foreach (UsbInterfaceInfo iface in config.InterfaceInfoList)
+                    {
+                        Debug.WriteLine(
+                            $"  Interface {iface.Descriptor.InterfaceID}");
+
+                        foreach (UsbEndpointInfo ep in iface.EndpointInfoList)
+                        {
+                            Debug.WriteLine(
+                                $"    Endpoint: {ep.Descriptor.EndpointID:X2}");
+                        }
+                    }
+                }
+
+                Debug.WriteLine("=== INTERFACE TEST ===");
+
+                for (int i = 0; i < 8; i++)
+                {
+                    try
+                    {
+                        wholeUsbDevice.ReleaseInterface(i);
+                    }
+                    catch
+                    {
+                    }
+
+                    try
+                    {
+                        wholeUsbDevice.ClaimInterface(i);
+
+                        Debug.WriteLine(
+                            $"Successfully claimed interface {i}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(
+                            $"Interface {i} failed: {ex.Message}");
+                    }
+                }
+                try
+                {
+                    wholeUsbDevice.ReleaseInterface(0);
+                }
+                catch
+                {
+                }
+
+                wholeUsbDevice.ClaimInterface(1);
             }
 
             reader = MyUsbDevice.OpenEndpointReader(ReadEndpointID.Ep01);

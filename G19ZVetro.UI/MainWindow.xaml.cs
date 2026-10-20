@@ -350,6 +350,10 @@ public partial class MainWindow : Window
     {
         var key = GetRealKey(e);
 
+        File.AppendAllText(
+            "keytest.log",
+            $"{DateTime.Now}: {key}{Environment.NewLine}");
+
         switch (key)
         {
             case Key.F1:
