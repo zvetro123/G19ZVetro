@@ -1,13 +1,14 @@
 ﻿using G19ZVetro;
 using G19ZVetro.Models;
 using G19ZVetro.Services;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
-using Forms = System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Interop;
-using System.IO;
 using System.Windows.Threading;
+using Forms = System.Windows.Forms;
 
 namespace G19ZVetro.UI;
 
@@ -31,6 +32,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+
+        KeyDown += MainWindow_KeyDown;
 
         trayIcon = new Forms.NotifyIcon();
 
@@ -157,21 +160,159 @@ public partial class MainWindow : Window
             $"Current: {currentSettings.ActiveProfile} - {profile.Name}";
     }
 
-    protected override void OnPreviewKeyDown(
-    System.Windows.Input.KeyEventArgs e)
+    private GKeyAction GetGKey(string key)
     {
-        base.OnPreviewKeyDown(e);
-
-        System.Diagnostics.Debug.WriteLine(
-            $"PREVIEW KEY DOWN: {e.Key}");
+        return settings
+            .Profiles[settings.ActiveProfile]
+            .GKeys[key];
     }
 
-    protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
+    private void LoadGKey(
+        string keyName,
+        System.Windows.Controls.ComboBox actionBox,
+        System.Windows.Controls.TextBox valueBox)
     {
-        base.OnKeyDown(e);
+        var gKey = GetGKey(keyName);
 
-        System.Diagnostics.Debug.WriteLine(
-            $"KEY DOWN: {e.Key}");
+        foreach (ComboBoxItem item in actionBox.Items)
+        {
+            if (item.Content?.ToString() == gKey.ActionType)
+            {
+                actionBox.SelectedItem = item;
+                break;
+            }
+        }
+
+        valueBox.Text = gKey.Value;
+    }
+
+    private void SaveGKey(
+        string keyName,
+        System.Windows.Controls.ComboBox actionBox,
+        System.Windows.Controls.TextBox valueBox)
+    {
+        var gKey =
+            settings.Profiles[settings.ActiveProfile]
+                .GKeys[keyName];
+
+        gKey.ActionType =
+            (actionBox.SelectedItem as ComboBoxItem)?
+                .Content?.ToString()
+            ?? "None";
+
+        gKey.Value = valueBox.Text;
+    }
+
+    private static Key GetRealKey(
+        System.Windows.Input.KeyEventArgs e)
+    {
+        return e.Key == Key.System
+            ? e.SystemKey
+            : e.Key;
+    }
+    private void ExecuteGKey(string gKeyName)
+    {
+        try
+        {
+            settings = SettingsManager.Load();
+
+            var profile =
+                settings.Profiles[settings.ActiveProfile];
+
+            if (!profile.GKeys.TryGetValue(
+                    gKeyName,
+                    out var gKey))
+            {
+                return;
+            }
+
+            switch (gKey.ActionType)
+            {
+                case "Program":
+                    if (string.IsNullOrWhiteSpace(gKey.Value))
+                        return;
+
+                    System.Diagnostics.Process.Start(
+                        new ProcessStartInfo
+                        {
+                            FileName = gKey.Value,
+                            UseShellExecute = true
+                        });
+                    break;
+
+                case "Website":
+                    Process.Start(
+                        new ProcessStartInfo
+                        {
+                            FileName = gKey.Value,
+                            UseShellExecute = true
+                        });
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(
+                $"ExecuteGKey error: {ex}");
+        }
+    }
+
+    private void MainWindow_KeyDown(
+        object sender,
+        System.Windows.Input.KeyEventArgs e)
+    {
+        var key = GetRealKey(e);
+
+        switch (key)
+        {
+            case Key.F1:
+                ExecuteGKey("G1");
+                break;
+
+            case Key.F2:
+                ExecuteGKey("G2");
+                break;
+
+            case Key.F3:
+                ExecuteGKey("G3");
+                break;
+
+            case Key.F4:
+                ExecuteGKey("G4");
+                break;
+
+            case Key.F5:
+                ExecuteGKey("G5");
+                break;
+
+            case Key.F6:
+                ExecuteGKey("G6");
+                break;
+
+            case Key.F7:
+                ExecuteGKey("G7");
+                break;
+
+            case Key.F8:
+                ExecuteGKey("G8");
+                break;
+
+            case Key.F9:
+                ExecuteGKey("G9");
+                break;
+
+            case Key.F10:
+                ExecuteGKey("G10");
+                break;
+
+            case Key.F11:
+                ExecuteGKey("G11");
+                break;
+
+            case Key.F12:
+                ExecuteGKey("G12");
+                break;
+        }
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -232,20 +373,18 @@ public partial class MainWindow : Window
         M2NameBox.Text = settings.Profiles["M2"].Name;
         M3NameBox.Text = settings.Profiles["M3"].Name;
 
-        var g1 = settings
-            .Profiles[settings.ActiveProfile]
-            .GKeys["G1"];
-
-        foreach (ComboBoxItem item in G1ActionTypeBox.Items)
-        {
-            if (item.Content?.ToString() == g1.ActionType)
-            {
-                G1ActionTypeBox.SelectedItem = item;
-                break;
-            }
-        }
-
-        G1ValueBox.Text = g1.Value;
+        LoadGKey("G1", G1ActionTypeBox, G1ValueBox);
+        LoadGKey("G2", G2ActionTypeBox, G2ValueBox);
+        LoadGKey("G3", G3ActionTypeBox, G3ValueBox);
+        LoadGKey("G4", G4ActionTypeBox, G4ValueBox);
+        LoadGKey("G5", G5ActionTypeBox, G5ValueBox);
+        LoadGKey("G6", G6ActionTypeBox, G6ValueBox);
+        LoadGKey("G7", G7ActionTypeBox, G7ValueBox);
+        LoadGKey("G8", G8ActionTypeBox, G8ValueBox);
+        LoadGKey("G9", G9ActionTypeBox, G9ValueBox);
+        LoadGKey("G10", G10ActionTypeBox, G10ValueBox);
+        LoadGKey("G11", G11ActionTypeBox, G11ValueBox);
+        LoadGKey("G12", G12ActionTypeBox, G12ValueBox);
     }
 
     protected override void OnActivated(EventArgs e)
@@ -270,12 +409,6 @@ public partial class MainWindow : Window
         IntPtr lParam,
         ref bool handled)
     {
-        if (msg == 0x00FF) // WM_INPUT
-        {
-            System.Diagnostics.Debug.WriteLine(
-                $"WM_INPUT wParam={wParam}");
-        }
-
         try
         {
             string logPath =
@@ -385,13 +518,18 @@ public partial class MainWindow : Window
         var activeProfile =
             settings.Profiles[settings.ActiveProfile];
 
-        activeProfile.GKeys["G1"].ActionType =
-            (G1ActionTypeBox.SelectedItem as ComboBoxItem)?
-                .Content?.ToString()
-            ?? "None";
-
-        activeProfile.GKeys["G1"].Value =
-            G1ValueBox.Text;
+        SaveGKey("G1", G1ActionTypeBox, G1ValueBox);
+        SaveGKey("G2", G2ActionTypeBox, G2ValueBox);
+        SaveGKey("G3", G3ActionTypeBox, G3ValueBox);
+        SaveGKey("G4", G4ActionTypeBox, G4ValueBox);
+        SaveGKey("G5", G5ActionTypeBox, G5ValueBox);
+        SaveGKey("G6", G6ActionTypeBox, G6ValueBox);
+        SaveGKey("G7", G7ActionTypeBox, G7ValueBox);
+        SaveGKey("G8", G8ActionTypeBox, G8ValueBox);
+        SaveGKey("G9", G9ActionTypeBox, G9ValueBox);
+        SaveGKey("G10", G10ActionTypeBox, G10ValueBox);
+        SaveGKey("G11", G11ActionTypeBox, G11ValueBox);
+        SaveGKey("G12", G12ActionTypeBox, G12ValueBox);
 
         SettingsManager.Save(settings);
 
