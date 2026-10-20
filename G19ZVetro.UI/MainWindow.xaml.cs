@@ -157,6 +157,23 @@ public partial class MainWindow : Window
             $"Current: {currentSettings.ActiveProfile} - {profile.Name}";
     }
 
+    protected override void OnPreviewKeyDown(
+    System.Windows.Input.KeyEventArgs e)
+    {
+        base.OnPreviewKeyDown(e);
+
+        System.Diagnostics.Debug.WriteLine(
+            $"PREVIEW KEY DOWN: {e.Key}");
+    }
+
+    protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        System.Diagnostics.Debug.WriteLine(
+            $"KEY DOWN: {e.Key}");
+    }
+
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
@@ -164,7 +181,45 @@ public partial class MainWindow : Window
         if (PresentationSource.FromVisual(this) is HwndSource source)
         {
             source.AddHook(WndProc);
+
+            RegisterForRawInput(source.Handle);
         }
+    }
+
+    [System.Runtime.InteropServices.StructLayout(
+    System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public struct RAWINPUTDEVICE
+    {
+        public ushort usUsagePage;
+        public ushort usUsage;
+        public int dwFlags;
+        public IntPtr hwndTarget;
+    }
+
+    [System.Runtime.InteropServices.DllImport("User32.dll")]
+    private static extern bool RegisterRawInputDevices(
+        RAWINPUTDEVICE[] pRawInputDevices,
+        uint uiNumDevices,
+        uint cbSize);
+
+    private void RegisterForRawInput(IntPtr hwnd)
+    {
+        RAWINPUTDEVICE[] devices =
+        {
+        new RAWINPUTDEVICE
+        {
+            usUsagePage = 0x01,
+            usUsage = 0x06, // Keyboard
+            dwFlags = 0,
+            hwndTarget = hwnd
+        }
+    };
+
+        RegisterRawInputDevices(
+            devices,
+            (uint)devices.Length,
+            (uint)System.Runtime.InteropServices.Marshal
+                .SizeOf<RAWINPUTDEVICE>());
     }
 
     private void RefreshProfileData()
@@ -215,6 +270,12 @@ public partial class MainWindow : Window
         IntPtr lParam,
         ref bool handled)
     {
+        if (msg == 0x00FF) // WM_INPUT
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"WM_INPUT wParam={wParam}");
+        }
+
         try
         {
             string logPath =

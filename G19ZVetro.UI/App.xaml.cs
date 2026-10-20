@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using G19ZVetro.Services;
+using System.Management;
+using System.Diagnostics;
 
 namespace G19ZVetro.UI
 {
@@ -47,6 +49,37 @@ namespace G19ZVetro.UI
                 base.OnStartup(e);
 
                 _service.Start();
+
+                foreach (ManagementObject obj in
+                         new ManagementObjectSearcher(
+                             "SELECT * FROM Win32_PnPEntity")
+                         .Get())
+                {
+                    var name = obj["Name"]?.ToString();
+
+                    if (!string.IsNullOrWhiteSpace(name) &&
+                        name.Contains("Logitech",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        Debug.WriteLine(
+                            $"LOGITECH DEVICE: {name}");
+                    }
+                }
+
+                foreach (ManagementObject obj in
+                         new ManagementObjectSearcher(
+                             "SELECT * FROM Win32_Keyboard")
+                         .Get())
+                {
+                    foreach (PropertyData prop in obj.Properties)
+                    {
+                        Debug.WriteLine(
+                            $"KEYBOARD {prop.Name} = {prop.Value}");
+                    }
+
+                    Debug.WriteLine(
+                        "--------------------------------");
+                }
             }
             catch (Exception ex)
             {

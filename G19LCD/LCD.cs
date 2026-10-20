@@ -110,8 +110,15 @@ namespace G19LCD
             if (MyUsbDevice == null)
                 throw new Exception("Device Not Found.");
 
-            wholeUsbDevice = MyUsbDevice as IUsbDevice;
+            foreach (UsbRegistry usbRegistry in UsbDevice.AllDevices)
+            {
+                Debug.WriteLine(
+                    $"VID={usbRegistry.Vid:X4} " +
+                    $"PID={usbRegistry.Pid:X4} " +
+                    $"Name={usbRegistry.FullName}");
+            }
 
+            wholeUsbDevice = MyUsbDevice as IUsbDevice;
             if (!ReferenceEquals(wholeUsbDevice, null))
             {
                 wholeUsbDevice.SetConfiguration(1);
@@ -138,6 +145,8 @@ namespace G19LCD
 
         private void HandleButton(byte[] buffer)
         {
+            Debug.WriteLine(
+    $"Button data: {BitConverter.ToString(buffer)}");
             switch (buffer[0])
             {
                 case 0x01:
@@ -193,6 +202,9 @@ namespace G19LCD
 
                     if (buffer[0] != 0)
                     {
+                        Debug.WriteLine(
+                          $"RAW: {BitConverter.ToString(buffer)}");
+
                         HandleButton(buffer);
                     }
                 }
