@@ -5,6 +5,27 @@ namespace G19ZVetro.Services;
 public sealed class G19InputService
 {
     public event Action<string>? GKeyPressed;
+    public void ProcessExtendedGKey(byte value)
+    {
+        switch (value)
+        {
+            case 0x01:
+                GKeyPressed?.Invoke("G9");
+                break;
+
+            case 0x02:
+                GKeyPressed?.Invoke("G10");
+                break;
+
+            case 0x04:
+                GKeyPressed?.Invoke("G11");
+                break;
+
+            case 0x08:
+                GKeyPressed?.Invoke("G12");
+                break;
+        }
+    }
 
     public void ProcessGKeyPacket(byte value)
     {

@@ -88,30 +88,12 @@ public partial class MainWindow : Window
                                 switch (value)
                                 {
                                     case 0x01:
-                                        Dispatcher.Invoke(() =>
-                                        {
-                                            ExecuteGKey("G9");
-                                        });
-                                        continue;
-
                                     case 0x02:
-                                        Dispatcher.Invoke(() =>
-                                        {
-                                            ExecuteGKey("G10");
-                                        });
-                                        continue;
-
                                     case 0x04:
-                                        Dispatcher.Invoke(() =>
-                                        {
-                                            ExecuteGKey("G11");
-                                        });
-                                        continue;
-
                                     case 0x08:
                                         Dispatcher.Invoke(() =>
                                         {
-                                            ExecuteGKey("G12");
+                                            _inputService.ProcessExtendedGKey(value);
                                         });
                                         continue;
                                 }
