@@ -10,7 +10,7 @@ public sealed class G19InputService
     public event Action<string>? GKeyPressed;
 
 
-    public void ProcessProfileButton(byte value)
+    private void ProcessProfileButton(byte value)
     {
         if (!Enum.IsDefined(
             typeof(G19ProfileButton),
@@ -23,7 +23,7 @@ public sealed class G19InputService
             (G19ProfileButton)value);
     }
 
-    public void ProcessExtendedGKey(byte value)
+    private void ProcessExtendedGKey(byte value)
     {
         switch (value)
         {
@@ -141,7 +141,7 @@ public sealed class G19InputService
             });
         }
     }
-    public void ProcessGKeyPacket(byte value)
+    private void ProcessGKeyPacket(byte value)
     {
         switch (value)
         {
