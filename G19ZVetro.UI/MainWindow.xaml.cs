@@ -1,16 +1,17 @@
 ﻿using G19ZVetro;
 using G19ZVetro.Models;
 using G19ZVetro.Services;
+using HidSharp;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using Forms = System.Windows.Forms;
-using HidSharp;
-using System.Linq;
 
 namespace G19ZVetro.UI;
 
@@ -19,6 +20,8 @@ public partial class MainWindow : Window
     private const int WM_DEVICECHANGE = 0x0219;
     private const int DBT_DEVICEARRIVAL = 0x8000;
     private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
+    private const int INPUT_KEYBOARD = 1;
+    private const uint KEYEVENTF_KEYUP = 0x0002;
     private G19Service service;
     private AppSettings settings;
     private Forms.NotifyIcon trayIcon;
@@ -28,10 +31,33 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer profileRefreshTimer = new();
     private void PlayMacro(List<string> keys)
     {
+        Thread.Sleep(1000);
+
         foreach (var key in keys)
         {
-            Debug.WriteLine(
-                $"Replay: {key}");
+            Debug.WriteLine($"Replay: {key}");
+
+            Forms.SendKeys.SendWait(key);
+        }
+    }
+
+    private void ProcessGKeyPacket(byte value)
+    {
+        switch (value)
+        {
+            case 0x01: ExecuteGKey("G1"); break;
+            case 0x02: ExecuteGKey("G2"); break;
+            case 0x04: ExecuteGKey("G3"); break;
+            case 0x08: ExecuteGKey("G4"); break;
+            case 0x10: ExecuteGKey("G5"); break;
+            case 0x20: ExecuteGKey("G6"); break;
+            case 0x40: ExecuteGKey("G7"); break;
+            case 0x80: ExecuteGKey("G8"); break;
+
+            default:
+                Debug.WriteLine(
+                    $"Unknown GKey value 0x{value:X2}");
+                break;
         }
     }
     private void MonitorG19Devices()
@@ -78,14 +104,58 @@ public partial class MainWindow : Window
                                     $"PID={device.ProductID:X4} " +
                                     $"COUNT={count} " +
                                     BitConverter.ToString(buffer));
-                                #endif
+#endif
 
                                 if (count < 3)
                                 {
                                     continue;
                                 }
 
+                                byte gKeyValue = buffer[1];
+
+                                if (gKeyValue != 0)
+                                {
+                                    Dispatcher.Invoke(() =>
+                                    {
+                                        Debug.WriteLine($"DIRECT GKEY 0x{gKeyValue:X2}");
+                                        ProcessGKeyPacket(gKeyValue);
+                                    });
+                                }
+
                                 byte value = buffer[2];
+
+                                switch (value)
+                                {
+                                    case 0x01:
+                                        Dispatcher.Invoke(() =>
+                                        {
+                                            ExecuteGKey("G9");
+                                        });
+                                        continue;
+
+                                    case 0x02:
+                                        Dispatcher.Invoke(() =>
+                                        {
+                                            ExecuteGKey("G10");
+                                        });
+                                        continue;
+
+                                    case 0x04:
+                                        Dispatcher.Invoke(() =>
+                                        {
+                                            ExecuteGKey("G11");
+                                        });
+                                        continue;
+
+                                    case 0x08:
+                                        Dispatcher.Invoke(() =>
+                                        {
+                                            ExecuteGKey("G12");
+                                        });
+                                        continue;
+                                }
+
+                                Debug.WriteLine($"value=0x{value:X2}");
 
                                 if (value == 0)
                                 {
@@ -142,7 +212,7 @@ public partial class MainWindow : Window
                                                     _recordedKeys
                                                         .Select(k => k.ToString())
                                                         .ToList();
-                                                gKey.ActionType = "Macro";
+                                                gKey.ActionType = "Recorded Macro";
                                                 gKey.Value = "";
 
                                                 SettingsManager.Save(settings);
@@ -196,6 +266,29 @@ public partial class MainWindow : Window
                 : "Keyboard Status: Not Detected";
     }
 
+    protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (!_macroRecording ||
+            _recordingTarget == null)
+        {
+            return;
+        }
+
+        var key = GetRealKey(e);
+
+        if (key >= Key.F1 && key <= Key.F24)
+        {
+            return;
+        }
+
+        _recordedKeys.Add(key);
+
+        Debug.WriteLine(
+            $"Captured: {key}");
+    }
+
     private void ActivateProfile(string profile)
     {
         ProfileManager.SetActiveProfile(profile);
@@ -209,19 +302,51 @@ public partial class MainWindow : Window
             Dispatcher.Invoke(RefreshProfileData);
         }
     }
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern uint SendInput(
+    uint nInputs,
+    [In] INPUT[] pInputs,
+    int cbSize);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct INPUT
+    {
+        public uint type;
+        public InputUnion U;
+    }
+
+    [StructLayout(LayoutKind.Explicit, Size = 24)]
+    private struct InputUnion
+    {
+        [FieldOffset(0)]
+        public KEYBDINPUT ki;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct KEYBDINPUT
+    {
+        public ushort wVk;
+        public ushort wScan;
+        public uint dwFlags;
+        public uint time;
+        public IntPtr dwExtraInfo;
+    }
 
     public MainWindow()
     {
         InitializeComponent();
 
-        KeyDown += MainWindow_KeyDown;
+        Debug.WriteLine($"IntPtr.Size={IntPtr.Size}");
+        Debug.WriteLine($"INPUT size={Marshal.SizeOf<INPUT>()}");
+        Debug.WriteLine($"KEYBDINPUT size={Marshal.SizeOf<KEYBDINPUT>()}");
+        Debug.WriteLine($"Offset U={Marshal.OffsetOf<INPUT>(nameof(INPUT.U))}");
 
         trayIcon = new Forms.NotifyIcon();
 
         trayIcon.Text = "G19ZVetro";
         trayIcon.Icon = System.Drawing.SystemIcons.Application;
 
-        var menu = new Forms.ContextMenuStrip();
+    var menu = new Forms.ContextMenuStrip();
 
         menu.Items.Add(
             "Open Settings",
@@ -416,11 +541,24 @@ public partial class MainWindow : Window
     }
 
     private void LoadGKey(
+
         string keyName,
         System.Windows.Controls.ComboBox actionBox,
         System.Windows.Controls.TextBox valueBox)
     {
+        Debug.WriteLine($"LoadGKey({keyName})");
+
         var gKey = GetGKey(keyName);
+
+        if (gKey.MacroKeys.Count > 0)
+        {
+            gKey.ActionType = "Recorded Macro";
+            valueBox.Text = string.Join(",", gKey.MacroKeys);
+        }
+        else
+        {
+            valueBox.Text = gKey.Value;
+        }
 
         foreach (ComboBoxItem item in actionBox.Items)
         {
@@ -430,8 +568,6 @@ public partial class MainWindow : Window
                 break;
             }
         }
-
-        valueBox.Text = gKey.Value;
     }
 
     private void SaveGKey(
@@ -443,13 +579,21 @@ public partial class MainWindow : Window
             settings.Profiles[settings.ActiveProfile]
                 .GKeys[keyName];
 
-        gKey.ActionType =
+        var selectedType =
             (actionBox.SelectedItem as ComboBoxItem)?
-                .Content?.ToString()
-            ?? "None";
+                .Content?.ToString();
+
+        if (selectedType == "Recorded Macro")
+        {
+            return;
+        }
+
+        gKey.ActionType =
+            selectedType ?? "None";
 
         gKey.Value = valueBox.Text;
     }
+
     private static Key GetRealKey(
         System.Windows.Input.KeyEventArgs e)
     {
@@ -459,6 +603,7 @@ public partial class MainWindow : Window
     }
     private void ExecuteGKey(string gKeyName)
     {
+        Debug.WriteLine($"ExecuteGKey({gKeyName})");
         try
         {
             if (_macroRecording)
@@ -476,12 +621,24 @@ public partial class MainWindow : Window
             var profile =
                 settings.Profiles[settings.ActiveProfile];
 
+            Debug.WriteLine(
+                $"ActiveProfile={settings.ActiveProfile}");
+
+            Debug.WriteLine(
+                $"GKeyExists={profile.GKeys.ContainsKey(gKeyName)}");
+
             if (!profile.GKeys.TryGetValue(
                     gKeyName,
                     out var gKey))
             {
                 return;
             }
+
+            Debug.WriteLine(
+                $"ActionType={gKey.ActionType}");
+
+            Debug.WriteLine(
+                $"MacroCount={gKey.MacroKeys.Count}");
 
             if (gKey.MacroKeys.Count > 0)
             {
@@ -533,85 +690,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void MainWindow_KeyDown(
-        object sender,
-        System.Windows.Input.KeyEventArgs e)
-    {
-        var key = GetRealKey(e);
-
-        if (_macroRecording &&
-            _recordingTarget != null)
-        {
-            if (key is >= Key.F1 &&
-                key <= Key.F12)
-            {
-                return;
-            }
-
-            _recordedKeys.Add(key);
-
-            Debug.WriteLine(
-                $"Captured {key} for {_recordingTarget}");
-
-            return;
-        }
-
-        File.AppendAllText(
-            "keytest.log",
-            $"{DateTime.Now}: {key}{Environment.NewLine}");
-
-        switch (key)
-        {
-            case Key.F1:
-                ExecuteGKey("G1");
-                break;
-
-            case Key.F2:
-                ExecuteGKey("G2");
-                break;
-
-            case Key.F3:
-                ExecuteGKey("G3");
-                break;
-
-            case Key.F4:
-                ExecuteGKey("G4");
-                break;
-
-            case Key.F5:
-                ExecuteGKey("G5");
-                break;
-
-            case Key.F6:
-                ExecuteGKey("G6");
-                break;
-
-            case Key.F7:
-                ExecuteGKey("G7");
-                break;
-
-            case Key.F8:
-                ExecuteGKey("G8");
-                break;
-
-            case Key.F9:
-                ExecuteGKey("G9");
-                break;
-
-            case Key.F10:
-                ExecuteGKey("G10");
-                break;
-
-            case Key.F11:
-                ExecuteGKey("G11");
-                break;
-
-            case Key.F12:
-                ExecuteGKey("G12");
-                break;
-        }
-    }
-
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
@@ -635,10 +713,37 @@ public partial class MainWindow : Window
     }
 
     [System.Runtime.InteropServices.DllImport("User32.dll")]
+
     private static extern bool RegisterRawInputDevices(
         RAWINPUTDEVICE[] pRawInputDevices,
         uint uiNumDevices,
         uint cbSize);
+
+    [DllImport("user32.dll")]
+    static extern void keybd_event(
+    byte bVk,
+    byte bScan,
+    uint dwFlags,
+    uint dwExtraInfo);
+
+    private void SendVirtualKey(ushort vk)
+    {
+        Debug.WriteLine(
+            $"Sending VK=0x{vk:X2}");
+        Debug.WriteLine($"keybd_event vk=0x{vk:X2}");
+
+        keybd_event(
+            (byte)vk,
+            0,
+            0,
+            0);
+
+        keybd_event(
+            (byte)vk,
+            0,
+            KEYEVENTF_KEYUP,
+            0);
+    }
 
     private void RegisterForRawInput(IntPtr hwnd)
     {
@@ -662,6 +767,8 @@ public partial class MainWindow : Window
 
     private void RefreshProfileData()
     {
+        Debug.WriteLine("RefreshProfileData()");
+
         settings = SettingsManager.Load();
         LoadRefreshRate();
 
@@ -689,7 +796,7 @@ public partial class MainWindow : Window
     {
         base.OnActivated(e);
 
-        RefreshProfileData();
+        Debug.WriteLine("ONACTIVATED");
     }
 
     protected override void OnClosing(

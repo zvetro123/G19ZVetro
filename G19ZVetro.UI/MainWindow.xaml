@@ -125,6 +125,7 @@
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
                     <ComboBoxItem>Folder</ComboBoxItem>
+                    <ComboBoxItem Content="Recorded Macro"/>
                 </ComboBox>
                 <Grid Grid.Row="0"
                       Grid.Column="2"
@@ -152,6 +153,7 @@
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
                     <ComboBoxItem>Folder</ComboBoxItem>
+                    <ComboBoxItem Content="Recorded Macro"/>
                 </ComboBox>
                 <Grid Grid.Row="1"
                       Grid.Column="2"
@@ -181,6 +183,7 @@
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
                     <ComboBoxItem>Folder</ComboBoxItem>
+                    <ComboBoxItem Content="Recorded Macro"/>
                 </ComboBox>
                 <Grid Grid.Row="2"
                       Grid.Column="2"
@@ -209,6 +212,7 @@
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
                     <ComboBoxItem>Folder</ComboBoxItem>
+                    <ComboBoxItem Content="Recorded Macro"/>
                 </ComboBox>
                 <Grid Grid.Row="3"
                       Grid.Column="2"
@@ -237,6 +241,7 @@
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
                     <ComboBoxItem>Folder</ComboBoxItem>
+                    <ComboBoxItem Content="Recorded Macro"/>
                 </ComboBox>
                 <Grid Grid.Row="4"
                       Grid.Column="2"
@@ -265,6 +270,7 @@
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
                     <ComboBoxItem>Folder</ComboBoxItem>
+                    <ComboBoxItem Content="Recorded Macro"/>
                 </ComboBox>
                 <Grid Grid.Row="5"
                       Grid.Column="2"
@@ -293,6 +299,7 @@
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
                     <ComboBoxItem>Folder</ComboBoxItem>
+                    <ComboBoxItem Content="Recorded Macro"/>
                 </ComboBox>
                 <Grid Grid.Row="6"
                       Grid.Column="2"
@@ -321,6 +328,7 @@
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
                     <ComboBoxItem>Folder</ComboBoxItem>
+                    <ComboBoxItem Content="Recorded Macro"/>
                 </ComboBox>
                 <Grid Grid.Row="7"
                       Grid.Column="2"
@@ -349,6 +357,7 @@
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
                     <ComboBoxItem>Folder</ComboBoxItem>
+                    <ComboBoxItem Content="Recorded Macro"/>
                 </ComboBox>
                 <Grid Grid.Row="8"
                       Grid.Column="2"
@@ -377,6 +386,7 @@
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
                     <ComboBoxItem>Folder</ComboBoxItem>
+                    <ComboBoxItem Content="Recorded Macro"/>
                 </ComboBox>
                 <Grid Grid.Row="9"
                       Grid.Column="2"
@@ -405,6 +415,7 @@
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
                     <ComboBoxItem>Folder</ComboBoxItem>
+                    <ComboBoxItem Content="Recorded Macro"/>
                 </ComboBox>
                 <Grid Grid.Row="10"
                       Grid.Column="2"
@@ -433,6 +444,7 @@
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
                     <ComboBoxItem>Folder</ComboBoxItem>
+                    <ComboBoxItem Content="Recorded Macro"/>
                 </ComboBox>
                 <Grid Grid.Row="11"
                       Grid.Column="2"
