@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using Forms = System.Windows.Forms;
+using HidSharp;
 
 namespace G19ZVetro.UI;
 
@@ -21,7 +22,112 @@ public partial class MainWindow : Window
     private AppSettings settings;
     private Forms.NotifyIcon trayIcon;
     private readonly DispatcherTimer profileRefreshTimer = new();
+    private void MonitorG19Devices()
+    {
+        foreach (var device in DeviceList.Local.GetHidDevices())
+        {
+            if (device.VendorID != 0x046D ||
+                device.ProductID != 0xC229 ||
+                !device.DevicePath.Contains(
+                    "col02",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
 
+            if (!device.TryOpen(out var stream))
+            {
+                Debug.WriteLine(
+                    $"FAILED OPEN PID={device.ProductID:X4}");
+                continue;
+            }
+
+            Debug.WriteLine(
+                $"OPENED PID={device.ProductID:X4}");
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    byte[] buffer =
+                        new byte[
+                            device.GetMaxInputReportLength()];
+
+                    while (true)
+                    {
+                        try
+                        {
+                            int count = stream.Read(buffer);
+
+                            if (count > 0)
+                            {
+                                #if DEBUG
+                                Debug.WriteLine(
+                                    $"PID={device.ProductID:X4} " +
+                                    $"COUNT={count} " +
+                                    BitConverter.ToString(buffer));
+                                #endif
+
+                                if (count < 3)
+                                {
+                                    continue;
+                                }
+
+                                byte value = buffer[2];
+
+                                if (value == 0)
+                                {
+                                    continue;
+                                }
+
+                                if (!Enum.IsDefined(typeof(G19ProfileButton),
+                                    (G19ProfileButton)value))
+                                {
+                                    Debug.WriteLine(
+                                        $"Unknown profile button: 0x{value:X2}");
+
+                                    continue;
+                                }
+
+                                var button = (G19ProfileButton)value;
+
+                                switch (button)
+                                {
+                                    case G19ProfileButton.M1:
+                                        Debug.WriteLine("SWITCHING TO M1");
+                                        ActivateProfile("M1");
+                                        break;
+
+                                    case G19ProfileButton.M2:
+                                        Debug.WriteLine("SWITCHING TO M2");
+                                        ActivateProfile("M2");
+                                        break;
+
+                                    case G19ProfileButton.M3:
+                                        Debug.WriteLine("SWITCHING TO M3");
+                                        ActivateProfile("M3");
+                                        break;
+
+                                    case G19ProfileButton.MR:
+                                        Debug.WriteLine("MR pressed");
+                                        break;
+                                }
+                            }
+                        }
+                        catch (TimeoutException)
+                        {
+                            continue;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(
+                        $"PID={device.ProductID:X4} ERROR {ex}");
+                }
+            });
+        }
+    }
     private void LoadRefreshRate()
     {
         foreach (ComboBoxItem item in RefreshRateBox.Items)
@@ -42,6 +148,19 @@ public partial class MainWindow : Window
                 : "Keyboard Status: Not Detected";
     }
 
+    private void ActivateProfile(string profile)
+    {
+        ProfileManager.SetActiveProfile(profile);
+
+        if (Dispatcher.CheckAccess())
+        {
+            RefreshProfileData();
+        }
+        else
+        {
+            Dispatcher.Invoke(RefreshProfileData);
+        }
+    }
     public MainWindow()
     {
         InitializeComponent();
@@ -130,6 +249,8 @@ public partial class MainWindow : Window
         UpdateKeyboardStatus(service.IsConnected);
 
         RefreshProfileData();
+
+        MonitorG19Devices();
 
         service.ConnectionChanged += connected =>
         {
@@ -280,7 +401,6 @@ public partial class MainWindow : Window
 
         gKey.Value = valueBox.Text;
     }
-
     private static Key GetRealKey(
         System.Windows.Input.KeyEventArgs e)
     {
@@ -625,29 +745,29 @@ public partial class MainWindow : Window
         System.Windows.MessageBox.Show(
             "Settings saved.");
 
+
+
         RefreshProfileData();
     }
     private void ActivateM1_Click(
     object sender,
     RoutedEventArgs e)
     {
-        ProfileManager.SetActiveProfile("M1");
-        RefreshProfileData();
+        ActivateProfile("M1");
     }
 
     private void ActivateM2_Click(
         object sender,
         RoutedEventArgs e)
     {
-        ProfileManager.SetActiveProfile("M2");
-        RefreshProfileData();
+        ActivateProfile("M2");
     }
 
     private void ActivateM3_Click(
         object sender,
         RoutedEventArgs e)
     {
-        ProfileManager.SetActiveProfile("M3");
-        RefreshProfileData();
+        ActivateProfile("M3");
     }
+
 }
