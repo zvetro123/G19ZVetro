@@ -10,6 +10,7 @@ using System.Windows.Interop;
 using System.Windows.Threading;
 using Forms = System.Windows.Forms;
 using HidSharp;
+using System.Linq;
 
 namespace G19ZVetro.UI;
 
@@ -121,6 +122,27 @@ public partial class MainWindow : Window
                                         }
                                         else
                                         {
+                                            if (_recordingTarget != null)
+                                            {
+                                                settings = SettingsManager.Load();
+
+                                                var gKey =
+                                                    settings.Profiles[settings.ActiveProfile]
+                                                        .GKeys[_recordingTarget];
+
+                                                gKey.MacroKeys =
+                                                    _recordedKeys
+                                                        .Select(k => k.ToString())
+                                                        .ToList();
+
+                                                SettingsManager.Save(settings);
+
+                                                Debug.WriteLine(
+                                                    $"Saved {_recordedKeys.Count} keys to {_recordingTarget}");
+
+                                                _recordingTarget = null;
+                                            }
+
                                             Debug.WriteLine(
                                                 $"Macro recording disabled. " +
                                                 $"{_recordedKeys.Count} keys captured.");

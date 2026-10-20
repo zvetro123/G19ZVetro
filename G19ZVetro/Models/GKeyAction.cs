@@ -5,4 +5,6 @@ public class GKeyAction
     public string ActionType { get; set; } = "None";
 
     public string Value { get; set; } = "";
+
+    public List<string> MacroKeys { get; set; } = new();
 }
