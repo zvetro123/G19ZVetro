@@ -21,108 +21,7 @@ public partial class MainWindow : Window
     private readonly MacroService _macroService = new();
     private readonly G19InputService _inputService =
     new();
-    private void MonitorG19Devices()
-    {
-        foreach (var device in DeviceList.Local.GetHidDevices())
-        {
-            if (device.VendorID != 0x046D ||
-                device.ProductID != 0xC229 ||
-                !device.DevicePath.Contains(
-                    "col02",
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            if (!device.TryOpen(out var stream))
-            {
-                Debug.WriteLine(
-                    $"FAILED OPEN PID={device.ProductID:X4}");
-                continue;
-            }
-
-            Debug.WriteLine(
-                $"OPENED PID={device.ProductID:X4}");
-
-            Task.Run(() =>
-            {
-                try
-                {
-                    byte[] buffer =
-                        new byte[
-                            device.GetMaxInputReportLength()];
-
-                    while (true)
-                    {
-                        try
-                        {
-                            int count = stream.Read(buffer);
-
-                            if (count > 0)
-                            {
-                                #if DEBUG
-                                Debug.WriteLine(
-                                    $"PID={device.ProductID:X4} " +
-                                    $"COUNT={count} " +
-                                    BitConverter.ToString(buffer));
-#endif
-
-                                if (count < 3)
-                                {
-                                    continue;
-                                }
-
-                                byte gKeyValue = buffer[1];
-
-                                if (gKeyValue != 0)
-                                {
-                                    Dispatcher.Invoke(() =>
-                                    {
-                                        Debug.WriteLine($"DIRECT GKEY 0x{gKeyValue:X2}");
-                                        _inputService.ProcessGKeyPacket(gKeyValue);
-                                    });
-                                }
-
-                                byte value = buffer[2];
-
-                                switch (value)
-                                {
-                                    case 0x01:
-                                    case 0x02:
-                                    case 0x04:
-                                    case 0x08:
-                                        Dispatcher.Invoke(() =>
-                                        {
-                                            _inputService.ProcessExtendedGKey(value);
-                                        });
-                                        continue;
-                                }
-
-                                if (value == 0)
-                                {
-                                    continue;
-                                }
-
-                                Dispatcher.Invoke(() =>
-                                {
-                                    _inputService.ProcessProfileButton(value);
-                                });
-                            }
-                        }
-                        catch (TimeoutException)
-                        {
-                            continue;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(
-                        $"PID={device.ProductID:X4} ERROR {ex}");
-                }
-            });
-        }
-    }
+    
     private void LoadRefreshRate()
     {
         foreach (ComboBoxItem item in RefreshRateBox.Items)
@@ -291,7 +190,7 @@ public partial class MainWindow : Window
 
         RefreshProfileData();
 
-        MonitorG19Devices();
+        _inputService.Start();
 
         service.ConnectionChanged += connected =>
         {
