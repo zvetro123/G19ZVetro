@@ -110,16 +110,20 @@ public partial class MainWindow : Window
 
         UpdateActiveProfileDisplay();
 
-        foreach (ComboBoxItem item in RefreshRateBox.Items)
+        var g1 = settings
+            .Profiles[settings.ActiveProfile]
+            .GKeys["G1"];
+
+        foreach (ComboBoxItem item in G1ActionTypeBox.Items)
         {
-            if (item.Content?.ToString() ==
-                settings.RefreshRate.ToString())
+            if (item.Content?.ToString() == g1.ActionType)
             {
-                RefreshRateBox.SelectedItem = item;
+                G1ActionTypeBox.SelectedItem = item;
                 break;
             }
         }
 
+        G1ValueBox.Text = g1.Value;
         StartupBox.IsChecked =
             settings.StartWithWindows;
         UpdateKeyboardStatus(service.IsConnected);
@@ -143,13 +147,14 @@ public partial class MainWindow : Window
 
     private void UpdateActiveProfileDisplay()
     {
-        settings = SettingsManager.Load();
+        var currentSettings = SettingsManager.Load();
 
         var profile =
-            settings.Profiles[settings.ActiveProfile];
+            currentSettings.Profiles[
+                currentSettings.ActiveProfile];
 
         ActiveProfileText.Text =
-            $"Current: {settings.ActiveProfile} - {profile.Name}";
+            $"Current: {currentSettings.ActiveProfile} - {profile.Name}";
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -171,6 +176,21 @@ public partial class MainWindow : Window
         M1NameBox.Text = settings.Profiles["M1"].Name;
         M2NameBox.Text = settings.Profiles["M2"].Name;
         M3NameBox.Text = settings.Profiles["M3"].Name;
+
+        var g1 = settings
+            .Profiles[settings.ActiveProfile]
+            .GKeys["G1"];
+
+        foreach (ComboBoxItem item in G1ActionTypeBox.Items)
+        {
+            if (item.Content?.ToString() == g1.ActionType)
+            {
+                G1ActionTypeBox.SelectedItem = item;
+                break;
+            }
+        }
+
+        G1ValueBox.Text = g1.Value;
     }
 
     protected override void OnActivated(EventArgs e)
@@ -301,17 +321,30 @@ public partial class MainWindow : Window
         M3GreenBox.Text = settings.Profiles["M3"].Green.ToString();
         M3BlueBox.Text = settings.Profiles["M3"].Blue.ToString();
 
+        var activeProfile =
+            settings.Profiles[settings.ActiveProfile];
+
+        activeProfile.GKeys["G1"].ActionType =
+            (G1ActionTypeBox.SelectedItem as ComboBoxItem)?
+                .Content?.ToString()
+            ?? "None";
+
+        activeProfile.GKeys["G1"].Value =
+            G1ValueBox.Text;
+
         SettingsManager.Save(settings);
 
         System.Windows.MessageBox.Show(
             "Settings saved.");
+
+        RefreshProfileData();
     }
     private void ActivateM1_Click(
     object sender,
     RoutedEventArgs e)
     {
         ProfileManager.SetActiveProfile("M1");
-        UpdateActiveProfileDisplay();
+        RefreshProfileData();
     }
 
     private void ActivateM2_Click(
@@ -319,7 +352,7 @@ public partial class MainWindow : Window
         RoutedEventArgs e)
     {
         ProfileManager.SetActiveProfile("M2");
-        UpdateActiveProfileDisplay();
+        RefreshProfileData();
     }
 
     private void ActivateM3_Click(
@@ -327,6 +360,6 @@ public partial class MainWindow : Window
         RoutedEventArgs e)
     {
         ProfileManager.SetActiveProfile("M3");
-        UpdateActiveProfileDisplay();
+        RefreshProfileData();
     }
 }
