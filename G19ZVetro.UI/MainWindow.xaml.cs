@@ -1,16 +1,13 @@
-﻿using G19ZVetro;
-using G19ZVetro.Models;
+﻿using G19ZVetro.Models;
 using G19ZVetro.Services;
 using HidSharp;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Threading;
 using Forms = System.Windows.Forms;
 
 namespace G19ZVetro.UI;
@@ -18,17 +15,12 @@ namespace G19ZVetro.UI;
 public partial class MainWindow : Window
 {
     private const int WM_DEVICECHANGE = 0x0219;
-    private const int DBT_DEVICEARRIVAL = 0x8000;
-    private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
-    private const int INPUT_KEYBOARD = 1;
-    private const uint KEYEVENTF_KEYUP = 0x0002;
     private G19Service service;
     private AppSettings settings;
     private Forms.NotifyIcon trayIcon;
     private bool _macroRecording;
     private string? _recordingTarget;
     private readonly List<Key> _recordedKeys = new();
-    private readonly DispatcherTimer profileRefreshTimer = new();
     private void PlayMacro(List<string> keys)
     {
         Thread.Sleep(1000);
@@ -154,8 +146,6 @@ public partial class MainWindow : Window
                                         });
                                         continue;
                                 }
-
-                                Debug.WriteLine($"value=0x{value:X2}");
 
                                 if (value == 0)
                                 {
@@ -302,44 +292,10 @@ public partial class MainWindow : Window
             Dispatcher.Invoke(RefreshProfileData);
         }
     }
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern uint SendInput(
-    uint nInputs,
-    [In] INPUT[] pInputs,
-    int cbSize);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct INPUT
-    {
-        public uint type;
-        public InputUnion U;
-    }
-
-    [StructLayout(LayoutKind.Explicit, Size = 24)]
-    private struct InputUnion
-    {
-        [FieldOffset(0)]
-        public KEYBDINPUT ki;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct KEYBDINPUT
-    {
-        public ushort wVk;
-        public ushort wScan;
-        public uint dwFlags;
-        public uint time;
-        public IntPtr dwExtraInfo;
-    }
 
     public MainWindow()
     {
         InitializeComponent();
-
-        Debug.WriteLine($"IntPtr.Size={IntPtr.Size}");
-        Debug.WriteLine($"INPUT size={Marshal.SizeOf<INPUT>()}");
-        Debug.WriteLine($"KEYBDINPUT size={Marshal.SizeOf<KEYBDINPUT>()}");
-        Debug.WriteLine($"Offset U={Marshal.OffsetOf<INPUT>(nameof(INPUT.U))}");
 
         trayIcon = new Forms.NotifyIcon();
 
@@ -433,26 +389,16 @@ public partial class MainWindow : Window
                 UpdateKeyboardStatus(connected);
             });
         };
-        profileRefreshTimer.Interval = TimeSpan.FromSeconds(1);
-
-        profileRefreshTimer.Tick += (_, _) =>
-        {
-            UpdateActiveProfileDisplay();
-        };
-
-        profileRefreshTimer.Start();
     }
 
     private void UpdateActiveProfileDisplay()
     {
-        var currentSettings = SettingsManager.Load();
-
         var profile =
-            currentSettings.Profiles[
-                currentSettings.ActiveProfile];
+            settings.Profiles[
+                settings.ActiveProfile];
 
         ActiveProfileText.Text =
-            $"Current: {currentSettings.ActiveProfile} - {profile.Name}";
+            $"Current: {settings.ActiveProfile} - {profile.Name}";
     }
 
     private string GetSelectedActionType(string gKeyName)
@@ -546,8 +492,6 @@ public partial class MainWindow : Window
         System.Windows.Controls.ComboBox actionBox,
         System.Windows.Controls.TextBox valueBox)
     {
-        Debug.WriteLine($"LoadGKey({keyName})");
-
         var gKey = GetGKey(keyName);
 
         if (gKey.MacroKeys.Count > 0)
@@ -621,24 +565,12 @@ public partial class MainWindow : Window
             var profile =
                 settings.Profiles[settings.ActiveProfile];
 
-            Debug.WriteLine(
-                $"ActiveProfile={settings.ActiveProfile}");
-
-            Debug.WriteLine(
-                $"GKeyExists={profile.GKeys.ContainsKey(gKeyName)}");
-
             if (!profile.GKeys.TryGetValue(
                     gKeyName,
                     out var gKey))
             {
                 return;
             }
-
-            Debug.WriteLine(
-                $"ActionType={gKey.ActionType}");
-
-            Debug.WriteLine(
-                $"MacroCount={gKey.MacroKeys.Count}");
 
             if (gKey.MacroKeys.Count > 0)
             {
@@ -719,32 +651,6 @@ public partial class MainWindow : Window
         uint uiNumDevices,
         uint cbSize);
 
-    [DllImport("user32.dll")]
-    static extern void keybd_event(
-    byte bVk,
-    byte bScan,
-    uint dwFlags,
-    uint dwExtraInfo);
-
-    private void SendVirtualKey(ushort vk)
-    {
-        Debug.WriteLine(
-            $"Sending VK=0x{vk:X2}");
-        Debug.WriteLine($"keybd_event vk=0x{vk:X2}");
-
-        keybd_event(
-            (byte)vk,
-            0,
-            0,
-            0);
-
-        keybd_event(
-            (byte)vk,
-            0,
-            KEYEVENTF_KEYUP,
-            0);
-    }
-
     private void RegisterForRawInput(IntPtr hwnd)
     {
         RAWINPUTDEVICE[] devices =
@@ -767,8 +673,6 @@ public partial class MainWindow : Window
 
     private void RefreshProfileData()
     {
-        Debug.WriteLine("RefreshProfileData()");
-
         settings = SettingsManager.Load();
         LoadRefreshRate();
 
@@ -790,13 +694,6 @@ public partial class MainWindow : Window
         LoadGKey("G10", G10ActionTypeBox, G10ValueBox);
         LoadGKey("G11", G11ActionTypeBox, G11ValueBox);
         LoadGKey("G12", G12ActionTypeBox, G12ValueBox);
-    }
-
-    protected override void OnActivated(EventArgs e)
-    {
-        base.OnActivated(e);
-
-        Debug.WriteLine("ONACTIVATED");
     }
 
     protected override void OnClosing(
@@ -826,9 +723,11 @@ public partial class MainWindow : Window
             Directory.CreateDirectory(
                 Path.GetDirectoryName(logPath)!);
 
+            #if DEBUG
             File.AppendAllText(
                 logPath,
                 $"{DateTime.Now}: MSG={msg:X}{Environment.NewLine}");
+            #endif
 
             if (msg == WM_DEVICECHANGE)
             {
