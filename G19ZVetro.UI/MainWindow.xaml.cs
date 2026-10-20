@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using Forms = System.Windows.Forms;
 using System.Windows.Interop;
 using System.IO;
+using System.Windows.Threading;
 
 namespace G19ZVetro.UI;
 
@@ -18,7 +19,7 @@ public partial class MainWindow : Window
     private G19Service service;
     private AppSettings settings;
     private Forms.NotifyIcon trayIcon;
-
+    private readonly DispatcherTimer profileRefreshTimer = new();
     private void UpdateKeyboardStatus(bool connected)
     {
         KeyboardStatusText.Text =
@@ -107,6 +108,8 @@ public partial class MainWindow : Window
         M3BlueBox.Text =
             settings.Profiles["M3"].Blue.ToString();
 
+        UpdateActiveProfileDisplay();
+
         foreach (ComboBoxItem item in RefreshRateBox.Items)
         {
             if (item.Content?.ToString() ==
@@ -128,6 +131,25 @@ public partial class MainWindow : Window
                 UpdateKeyboardStatus(connected);
             });
         };
+        profileRefreshTimer.Interval = TimeSpan.FromSeconds(1);
+
+        profileRefreshTimer.Tick += (_, _) =>
+        {
+            UpdateActiveProfileDisplay();
+        };
+
+        profileRefreshTimer.Start();
+    }
+
+    private void UpdateActiveProfileDisplay()
+    {
+        settings = SettingsManager.Load();
+
+        var profile =
+            settings.Profiles[settings.ActiveProfile];
+
+        ActiveProfileText.Text =
+            $"Current: {settings.ActiveProfile} - {profile.Name}";
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -138,6 +160,24 @@ public partial class MainWindow : Window
         {
             source.AddHook(WndProc);
         }
+    }
+
+    private void RefreshProfileData()
+    {
+        settings = SettingsManager.Load();
+
+        UpdateActiveProfileDisplay();
+
+        M1NameBox.Text = settings.Profiles["M1"].Name;
+        M2NameBox.Text = settings.Profiles["M2"].Name;
+        M3NameBox.Text = settings.Profiles["M3"].Name;
+    }
+
+    protected override void OnActivated(EventArgs e)
+    {
+        base.OnActivated(e);
+
+        RefreshProfileData();
     }
 
     protected override void OnClosing(
@@ -265,5 +305,28 @@ public partial class MainWindow : Window
 
         System.Windows.MessageBox.Show(
             "Settings saved.");
+    }
+    private void ActivateM1_Click(
+    object sender,
+    RoutedEventArgs e)
+    {
+        ProfileManager.SetActiveProfile("M1");
+        UpdateActiveProfileDisplay();
+    }
+
+    private void ActivateM2_Click(
+        object sender,
+        RoutedEventArgs e)
+    {
+        ProfileManager.SetActiveProfile("M2");
+        UpdateActiveProfileDisplay();
+    }
+
+    private void ActivateM3_Click(
+        object sender,
+        RoutedEventArgs e)
+    {
+        ProfileManager.SetActiveProfile("M3");
+        UpdateActiveProfileDisplay();
     }
 }

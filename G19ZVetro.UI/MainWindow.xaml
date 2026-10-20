@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="G19ZVetro"
-        Height="550"
+        Height="705"
         Width="400">
 
     <StackPanel Margin="20">
@@ -88,7 +88,36 @@
             <TextBlock Text="B" VerticalAlignment="Center"/>
             <TextBox x:Name="M3BlueBox" Width="40" Margin="5,0,0,0"/>
         </StackPanel>
-        
+
+        <TextBlock
+    Margin="0,20,0,10"
+    FontWeight="Bold"
+    FontSize="16"
+    Text="Active Profile"/>
+
+        <TextBlock
+    x:Name="ActiveProfileText"
+    Margin="0,0,0,10"
+    Text="Current: M1 - Development"/>
+
+        <StackPanel Orientation="Horizontal">
+
+            <Button
+        Content="Activate M1"
+        Click="ActivateM1_Click"
+        Margin="0,0,5,0"/>
+
+            <Button
+        Content="Activate M2"
+        Click="ActivateM2_Click"
+        Margin="0,0,5,0"/>
+
+            <Button
+        Content="Activate M3"
+        Click="ActivateM3_Click"/>
+
+        </StackPanel>
+
         <Button
             Content="Save"
             Click="Save_Click"/>
