@@ -1,9 +1,25 @@
 ﻿using G19ZVetro.Models;
+using System.Diagnostics;
 
 namespace G19ZVetro.Services;
 
 public sealed class G19InputService
 {
+    public event Action<G19ProfileButton>? ProfileButtonPressed;
+
+    public void ProcessProfileButton(byte value)
+    {
+        if (!Enum.IsDefined(
+            typeof(G19ProfileButton),
+            (G19ProfileButton)value))
+        {
+            return;
+        }
+
+        ProfileButtonPressed?.Invoke(
+            (G19ProfileButton)value);
+    }
+
     public event Action<string>? GKeyPressed;
     public void ProcessExtendedGKey(byte value)
     {

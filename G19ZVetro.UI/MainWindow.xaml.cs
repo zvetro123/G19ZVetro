@@ -103,72 +103,10 @@ public partial class MainWindow : Window
                                     continue;
                                 }
 
-                                if (!Enum.IsDefined(typeof(G19ProfileButton),
-                                    (G19ProfileButton)value))
+                                Dispatcher.Invoke(() =>
                                 {
-                                    Debug.WriteLine(
-                                        $"Unknown profile button: 0x{value:X2}");
-
-                                    continue;
-                                }
-
-                                var button = (G19ProfileButton)value;
-
-                                switch (button)
-                                {
-                                    case G19ProfileButton.M1:
-                                        Debug.WriteLine("SWITCHING TO M1");
-                                        ActivateProfile("M1");
-                                        break;
-
-                                    case G19ProfileButton.M2:
-                                        Debug.WriteLine("SWITCHING TO M2");
-                                        ActivateProfile("M2");
-                                        break;
-
-                                    case G19ProfileButton.M3:
-                                        Debug.WriteLine("SWITCHING TO M3");
-                                        ActivateProfile("M3");
-                                        break;
-
-                                    case G19ProfileButton.MR:
-
-                                        if (!_macroService.IsRecording)
-                                        {
-                                            _macroService.StartRecording();
-
-                                            Debug.WriteLine(
-                                                "Macro recording enabled");
-                                        }
-                                        else
-                                        {
-                                            if (_macroService.RecordingTarget != null)
-                                            {
-                                                settings = SettingsManager.Load();
-
-                                                var gKey =
-                                                    settings.Profiles[
-                                                        settings.ActiveProfile]
-                                                        .GKeys[
-                                                            _macroService.RecordingTarget];
-
-                                                gKey.MacroKeys =
-                                                    _macroService.EndRecording();
-
-                                                gKey.ActionType =
-                                                    "Recorded Macro";
-
-                                                gKey.Value = "";
-
-                                                SettingsManager.Save(settings);
-
-                                                Debug.WriteLine(
-                                                    $"Saved {gKey.MacroKeys.Count} keys");
-                                            }
-                                        }
-
-                                        break;
-                                }
+                                    _inputService.ProcessProfileButton(value);
+                                });
                             }
                         }
                         catch (TimeoutException)
@@ -247,6 +185,28 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         _inputService.GKeyPressed += ExecuteGKey;
+
+        _inputService.ProfileButtonPressed += button =>
+        {
+            switch (button)
+            {
+                case G19ProfileButton.M1:
+                    ActivateProfile("M1");
+                    break;
+
+                case G19ProfileButton.M2:
+                    ActivateProfile("M2");
+                    break;
+
+                case G19ProfileButton.M3:
+                    ActivateProfile("M3");
+                    break;
+
+                case G19ProfileButton.MR:
+                    HandleMacroButton();
+                    break;
+            }
+        };
 
         trayIcon = new Forms.NotifyIcon();
 
@@ -496,6 +456,44 @@ public partial class MainWindow : Window
             ? e.SystemKey
             : e.Key;
     }
+
+    private void HandleMacroButton()
+    {
+        if (!_macroService.IsRecording)
+        {
+            _macroService.StartRecording();
+
+            Debug.WriteLine(
+                "Macro recording enabled");
+        }
+        else
+        {
+            if (_macroService.RecordingTarget != null)
+            {
+                settings = SettingsManager.Load();
+
+                var gKey =
+                    settings.Profiles[
+                        settings.ActiveProfile]
+                        .GKeys[
+                            _macroService.RecordingTarget];
+
+                gKey.MacroKeys =
+                    _macroService.EndRecording();
+
+                gKey.ActionType =
+                    "Recorded Macro";
+
+                gKey.Value = "";
+
+                SettingsManager.Save(settings);
+
+                Debug.WriteLine(
+                    $"Saved {gKey.MacroKeys.Count} keys");
+            }
+        }
+    }
+
     private void ExecuteGKey(string gKeyName)
     {
         Debug.WriteLine($"ExecuteGKey({gKeyName})");
