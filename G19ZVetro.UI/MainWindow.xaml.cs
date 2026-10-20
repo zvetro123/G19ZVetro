@@ -26,6 +26,14 @@ public partial class MainWindow : Window
     private string? _recordingTarget;
     private readonly List<Key> _recordedKeys = new();
     private readonly DispatcherTimer profileRefreshTimer = new();
+    private void PlayMacro(List<string> keys)
+    {
+        foreach (var key in keys)
+        {
+            Debug.WriteLine(
+                $"Replay: {key}");
+        }
+    }
     private void MonitorG19Devices()
     {
         foreach (var device in DeviceList.Local.GetHidDevices())
@@ -201,6 +209,7 @@ public partial class MainWindow : Window
             Dispatcher.Invoke(RefreshProfileData);
         }
     }
+
     public MainWindow()
     {
         InitializeComponent();
@@ -479,11 +488,7 @@ public partial class MainWindow : Window
                 Debug.WriteLine(
                     $"Playing macro for {gKeyName}");
 
-                foreach (var keyName in gKey.MacroKeys)
-                {
-                    Debug.WriteLine(
-                        $"Replay: {keyName}");
-                }
+                PlayMacro(gKey.MacroKeys);
 
                 return;
             }
@@ -537,6 +542,12 @@ public partial class MainWindow : Window
         if (_macroRecording &&
             _recordingTarget != null)
         {
+            if (key is >= Key.F1 &&
+                key <= Key.F12)
+            {
+                return;
+            }
+
             _recordedKeys.Add(key);
 
             Debug.WriteLine(
