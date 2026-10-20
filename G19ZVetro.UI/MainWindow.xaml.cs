@@ -19,25 +19,8 @@ public partial class MainWindow : Window
     private AppSettings settings;
     private Forms.NotifyIcon trayIcon;
     private readonly MacroService _macroService = new();
-    private void ProcessGKeyPacket(byte value)
-    {
-        switch (value)
-        {
-            case 0x01: ExecuteGKey("G1"); break;
-            case 0x02: ExecuteGKey("G2"); break;
-            case 0x04: ExecuteGKey("G3"); break;
-            case 0x08: ExecuteGKey("G4"); break;
-            case 0x10: ExecuteGKey("G5"); break;
-            case 0x20: ExecuteGKey("G6"); break;
-            case 0x40: ExecuteGKey("G7"); break;
-            case 0x80: ExecuteGKey("G8"); break;
-
-            default:
-                Debug.WriteLine(
-                    $"Unknown GKey value 0x{value:X2}");
-                break;
-        }
-    }
+    private readonly G19InputService _inputService =
+    new();
     private void MonitorG19Devices()
     {
         foreach (var device in DeviceList.Local.GetHidDevices())
@@ -96,7 +79,7 @@ public partial class MainWindow : Window
                                     Dispatcher.Invoke(() =>
                                     {
                                         Debug.WriteLine($"DIRECT GKEY 0x{gKeyValue:X2}");
-                                        ProcessGKeyPacket(gKeyValue);
+                                        _inputService.ProcessGKeyPacket(gKeyValue);
                                     });
                                 }
 
@@ -280,6 +263,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+
+        _inputService.GKeyPressed += ExecuteGKey;
 
         trayIcon = new Forms.NotifyIcon();
 
