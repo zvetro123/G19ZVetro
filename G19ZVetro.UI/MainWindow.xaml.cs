@@ -134,6 +134,8 @@ public partial class MainWindow : Window
                                                     _recordedKeys
                                                         .Select(k => k.ToString())
                                                         .ToList();
+                                                gKey.ActionType = "Macro";
+                                                gKey.Value = "";
 
                                                 SettingsManager.Save(settings);
 
