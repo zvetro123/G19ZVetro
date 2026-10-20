@@ -72,6 +72,15 @@ public partial class MainWindow : Window
 
         settings = SettingsManager.Load();
 
+        M1NameBox.Text =
+            settings.Profiles["M1"].Name;
+
+        M2NameBox.Text =
+            settings.Profiles["M2"].Name;
+
+        M3NameBox.Text =
+            settings.Profiles["M3"].Name;
+
         foreach (ComboBoxItem item in RefreshRateBox.Items)
         {
             if (item.Content?.ToString() ==
@@ -171,6 +180,15 @@ public partial class MainWindow : Window
 
         StartupManager.SetStartup(
             settings.StartWithWindows);
+
+        settings.Profiles["M1"].Name =
+            M1NameBox.Text;
+
+        settings.Profiles["M2"].Name =
+            M2NameBox.Text;
+
+        settings.Profiles["M3"].Name =
+            M3NameBox.Text;
 
         SettingsManager.Save(settings);
 
