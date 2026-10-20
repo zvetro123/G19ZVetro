@@ -22,6 +22,8 @@ public partial class MainWindow : Window
     private AppSettings settings;
     private Forms.NotifyIcon trayIcon;
     private bool _macroRecording;
+    private string? _recordingTarget;
+
     private readonly DispatcherTimer profileRefreshTimer = new();
     private void MonitorG19Devices()
     {
@@ -419,6 +421,16 @@ public partial class MainWindow : Window
     {
         try
         {
+            if (_macroRecording)
+            {
+                _recordingTarget = gKeyName;
+
+                Debug.WriteLine(
+                    $"Recording macro for {gKeyName}");
+
+                return;
+            }
+
             settings = SettingsManager.Load();
 
             var profile =
