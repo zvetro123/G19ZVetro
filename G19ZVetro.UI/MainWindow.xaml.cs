@@ -160,6 +160,84 @@ public partial class MainWindow : Window
             $"Current: {currentSettings.ActiveProfile} - {profile.Name}";
     }
 
+    private string GetSelectedActionType(string gKeyName)
+    {
+        System.Windows.Controls.ComboBox? comboBox =
+            FindName($"{gKeyName}ActionTypeBox")
+                as System.Windows.Controls.ComboBox;
+
+        return
+            (comboBox?.SelectedItem as ComboBoxItem)?
+                .Content?.ToString()
+            ?? "None";
+    }
+
+    private void BrowseValue_Click(
+       object sender,
+       RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button button)
+            return;
+
+        if (button.Tag is not string textBoxName)
+            return;
+
+        if (FindName(textBoxName) is not System.Windows.Controls.TextBox textBox)
+            return;
+
+        string gKeyName =
+            GetGKeyNumber(textBoxName);
+
+        string actionType =
+            GetSelectedActionType(gKeyName);
+
+        switch (actionType)
+        {
+            case "Program":
+                {
+                    var dialog =
+                        new Microsoft.Win32.OpenFileDialog();
+
+                    dialog.Filter =
+                        "Programs (*.exe)|*.exe|All Files (*.*)|*.*";
+
+                    if (dialog.ShowDialog() == true)
+                    {
+                        textBox.Text = dialog.FileName;
+                    }
+
+                    break;
+                }
+
+            case "Folder":
+                {
+                    using var dialog =
+                        new Forms.FolderBrowserDialog();
+
+                    if (dialog.ShowDialog() ==
+                        Forms.DialogResult.OK)
+                    {
+                        textBox.Text = dialog.SelectedPath;
+                    }
+
+                    break;
+                }
+
+            default:
+                {
+                    System.Windows.MessageBox.Show(
+                        "Select Program or Folder first.");
+
+                    break;
+                }
+        }
+    }
+
+    private static string GetGKeyNumber(string textBoxName)
+    {
+        return textBoxName.Replace("ValueBox", "");
+    }
+
     private GKeyAction GetGKey(string key)
     {
         return settings
@@ -241,6 +319,15 @@ public partial class MainWindow : Window
                     break;
 
                 case "Website":
+                    Process.Start(
+                        new ProcessStartInfo
+                        {
+                            FileName = gKey.Value,
+                            UseShellExecute = true
+                        });
+                    break;
+
+                case "Folder":
                     Process.Start(
                         new ProcessStartInfo
                         {

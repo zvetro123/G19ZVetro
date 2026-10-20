@@ -124,17 +124,55 @@
                     <ComboBoxItem>None</ComboBoxItem>
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
+                    <ComboBoxItem>Folder</ComboBoxItem>
                 </ComboBox>
-                <TextBox x:Name="G1ValueBox" Grid.Row="0" Grid.Column="2" Margin="5,2"/>
+                <Grid Grid.Row="0"
+                      Grid.Column="2"
+                      Margin="5,2">
 
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="G1ValueBox"
+                         Grid.Column="0"
+                         Margin="0,0,5,0"/>
+
+                    <Button Content="Browse"
+                            Grid.Column="1"
+                            Tag="G1ValueBox"
+                            Click="BrowseValue_Click"/>
+
+                </Grid>
                 <!-- G2 -->
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="G2" VerticalAlignment="Center"/>
                 <ComboBox x:Name="G2ActionTypeBox" Grid.Row="1" Grid.Column="1" Margin="5,2">
                     <ComboBoxItem>None</ComboBoxItem>
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
+                    <ComboBoxItem>Folder</ComboBoxItem>
                 </ComboBox>
-                <TextBox x:Name="G2ValueBox" Grid.Row="1" Grid.Column="2" Margin="5,2"/>
+                <Grid Grid.Row="1"
+                      Grid.Column="2"
+                      Margin="5,2">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="G2ValueBox"
+                             Grid.Column="0"
+                             Margin="0,0,5,0"/>
+
+                    <Button Content="Browse"
+                            Grid.Column="1"
+                            Tag="G2ValueBox"
+                            Click="BrowseValue_Click"/>
+
+                </Grid>
+
 
                 <!-- G3 -->
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="G3" VerticalAlignment="Center"/>
@@ -142,90 +180,280 @@
                     <ComboBoxItem>None</ComboBoxItem>
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
+                    <ComboBoxItem>Folder</ComboBoxItem>
                 </ComboBox>
-                <TextBox x:Name="G3ValueBox" Grid.Row="2" Grid.Column="2" Margin="5,2"/>
+                <Grid Grid.Row="2"
+                      Grid.Column="2"
+                      Margin="5,2">
 
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="G3ValueBox"
+                             Grid.Column="0"
+                             Margin="0,0,5,0"/>
+
+                    <Button Content="Browse"
+                            Grid.Column="1"
+                            Tag="G3ValueBox"
+                            Click="BrowseValue_Click"/>
+
+                </Grid>
+                
                 <!-- G4 -->
                 <TextBlock Grid.Row="3" Grid.Column="0" Text="G4" VerticalAlignment="Center"/>
                 <ComboBox x:Name="G4ActionTypeBox" Grid.Row="3" Grid.Column="1" Margin="5,2">
                     <ComboBoxItem>None</ComboBoxItem>
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
+                    <ComboBoxItem>Folder</ComboBoxItem>
                 </ComboBox>
-                <TextBox x:Name="G4ValueBox" Grid.Row="3" Grid.Column="2" Margin="5,2"/>
+                <Grid Grid.Row="3"
+                      Grid.Column="2"
+                      Margin="5,2">
 
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="G4ValueBox"
+                             Grid.Column="0"
+                             Margin="0,0,5,0"/>
+
+                    <Button Content="Browse"
+                            Grid.Column="1"
+                            Tag="G4ValueBox"
+                            Click="BrowseValue_Click"/>
+
+                </Grid>
+                
                 <!-- G5 -->
                 <TextBlock Grid.Row="4" Grid.Column="0" Text="G5" VerticalAlignment="Center"/>
                 <ComboBox x:Name="G5ActionTypeBox" Grid.Row="4" Grid.Column="1" Margin="5,2">
                     <ComboBoxItem>None</ComboBoxItem>
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
+                    <ComboBoxItem>Folder</ComboBoxItem>
                 </ComboBox>
-                <TextBox x:Name="G5ValueBox" Grid.Row="4" Grid.Column="2" Margin="5,2"/>
+                <Grid Grid.Row="4"
+                      Grid.Column="2"
+                      Margin="5,2">
 
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="G5ValueBox"
+                             Grid.Column="0"
+                             Margin="0,0,5,0"/>
+
+                    <Button Content="Browse"
+                            Grid.Column="1"
+                            Tag="G5ValueBox"
+                            Click="BrowseValue_Click"/>
+
+                </Grid>
+                
                 <!-- G6 -->
                 <TextBlock Grid.Row="5" Grid.Column="0" Text="G6" VerticalAlignment="Center"/>
                 <ComboBox x:Name="G6ActionTypeBox" Grid.Row="5" Grid.Column="1" Margin="5,2">
                     <ComboBoxItem>None</ComboBoxItem>
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
+                    <ComboBoxItem>Folder</ComboBoxItem>
                 </ComboBox>
-                <TextBox x:Name="G6ValueBox" Grid.Row="5" Grid.Column="2" Margin="5,2"/>
+                <Grid Grid.Row="5"
+                      Grid.Column="2"
+                      Margin="5,2">
 
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="G6ValueBox"
+                             Grid.Column="0"
+                             Margin="0,0,5,0"/>
+
+                    <Button Content="Browse"
+                            Grid.Column="1"
+                            Tag="G6ValueBox"
+                            Click="BrowseValue_Click"/>
+
+                </Grid>
+                
                 <!-- G7 -->
                 <TextBlock Grid.Row="6" Grid.Column="0" Text="G7" VerticalAlignment="Center"/>
                 <ComboBox x:Name="G7ActionTypeBox" Grid.Row="6" Grid.Column="1" Margin="5,2">
                     <ComboBoxItem>None</ComboBoxItem>
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
+                    <ComboBoxItem>Folder</ComboBoxItem>
                 </ComboBox>
-                <TextBox x:Name="G7ValueBox" Grid.Row="6" Grid.Column="2" Margin="5,2"/>
+                <Grid Grid.Row="6"
+                      Grid.Column="2"
+                      Margin="5,2">
 
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="G7ValueBox"
+                             Grid.Column="0"
+                             Margin="0,0,5,0"/>
+
+                    <Button Content="Browse"
+                            Grid.Column="1"
+                            Tag="G7ValueBox"
+                            Click="BrowseValue_Click"/>
+
+                </Grid>
+                
                 <!-- G8 -->
                 <TextBlock Grid.Row="7" Grid.Column="0" Text="G8" VerticalAlignment="Center"/>
                 <ComboBox x:Name="G8ActionTypeBox" Grid.Row="7" Grid.Column="1" Margin="5,2">
                     <ComboBoxItem>None</ComboBoxItem>
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
+                    <ComboBoxItem>Folder</ComboBoxItem>
                 </ComboBox>
-                <TextBox x:Name="G8ValueBox" Grid.Row="7" Grid.Column="2" Margin="5,2"/>
+                <Grid Grid.Row="7"
+                      Grid.Column="2"
+                      Margin="5,2">
 
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="G8ValueBox"
+                             Grid.Column="0"
+                             Margin="0,0,5,0"/>
+
+                    <Button Content="Browse"
+                            Grid.Column="1"
+                            Tag="G8ValueBox"
+                            Click="BrowseValue_Click"/>
+
+                </Grid>
+                
                 <!-- G9 -->
                 <TextBlock Grid.Row="8" Grid.Column="0" Text="G9" VerticalAlignment="Center"/>
                 <ComboBox x:Name="G9ActionTypeBox" Grid.Row="8" Grid.Column="1" Margin="5,2">
                     <ComboBoxItem>None</ComboBoxItem>
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
+                    <ComboBoxItem>Folder</ComboBoxItem>
                 </ComboBox>
-                <TextBox x:Name="G9ValueBox" Grid.Row="8" Grid.Column="2" Margin="5,2"/>
+                <Grid Grid.Row="8"
+                      Grid.Column="2"
+                      Margin="5,2">
 
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="G9ValueBox"
+                             Grid.Column="0"
+                             Margin="0,0,5,0"/>
+
+                    <Button Content="Browse"
+                            Grid.Column="1"
+                            Tag="G9ValueBox"
+                            Click="BrowseValue_Click"/>
+
+                </Grid>
+                
                 <!-- G10 -->
                 <TextBlock Grid.Row="9" Grid.Column="0" Text="G10" VerticalAlignment="Center"/>
                 <ComboBox x:Name="G10ActionTypeBox" Grid.Row="9" Grid.Column="1" Margin="5,2">
                     <ComboBoxItem>None</ComboBoxItem>
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
+                    <ComboBoxItem>Folder</ComboBoxItem>
                 </ComboBox>
-                <TextBox x:Name="G10ValueBox" Grid.Row="9" Grid.Column="2" Margin="5,2"/>
+                <Grid Grid.Row="9"
+                      Grid.Column="2"
+                      Margin="5,2">
 
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="G10ValueBox"
+                             Grid.Column="0"
+                             Margin="0,0,5,0"/>
+
+                    <Button Content="Browse"
+                            Grid.Column="1"
+                            Tag="G10ValueBox"
+                            Click="BrowseValue_Click"/>
+
+                </Grid>
+                
                 <!-- G11 -->
                 <TextBlock Grid.Row="10" Grid.Column="0" Text="G11" VerticalAlignment="Center"/>
                 <ComboBox x:Name="G11ActionTypeBox" Grid.Row="10" Grid.Column="1" Margin="5,2">
                     <ComboBoxItem>None</ComboBoxItem>
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
+                    <ComboBoxItem>Folder</ComboBoxItem>
                 </ComboBox>
-                <TextBox x:Name="G11ValueBox" Grid.Row="10" Grid.Column="2" Margin="5,2"/>
+                <Grid Grid.Row="10"
+                      Grid.Column="2"
+                      Margin="5,2">
 
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="G11ValueBox"
+                             Grid.Column="0"
+                             Margin="0,0,5,0"/>
+
+                    <Button Content="Browse"
+                            Grid.Column="1"
+                            Tag="G11ValueBox"
+                            Click="BrowseValue_Click"/>
+
+                </Grid>
+                
                 <!-- G12 -->
                 <TextBlock Grid.Row="11" Grid.Column="0" Text="G12" VerticalAlignment="Center"/>
                 <ComboBox x:Name="G12ActionTypeBox" Grid.Row="11" Grid.Column="1" Margin="5,2">
                     <ComboBoxItem>None</ComboBoxItem>
                     <ComboBoxItem>Program</ComboBoxItem>
                     <ComboBoxItem>Website</ComboBoxItem>
+                    <ComboBoxItem>Folder</ComboBoxItem>
                 </ComboBox>
-                <TextBox x:Name="G12ValueBox" Grid.Row="11" Grid.Column="2" Margin="5,2"/>
+                <Grid Grid.Row="11"
+                      Grid.Column="2"
+                      Margin="5,2">
 
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="70"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="G12ValueBox"
+                             Grid.Column="0"
+                             Margin="0,0,5,0"/>
+
+                    <Button Content="Browse"
+                            Grid.Column="1"
+                            Tag="G12ValueBox"
+                            Click="BrowseValue_Click"/>
+
+                </Grid>
+                
             </Grid>
         
             <TextBlock
