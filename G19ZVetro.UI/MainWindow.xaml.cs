@@ -23,7 +23,7 @@ public partial class MainWindow : Window
     private Forms.NotifyIcon trayIcon;
     private bool _macroRecording;
     private string? _recordingTarget;
-
+    private readonly List<Key> _recordedKeys = new();
     private readonly DispatcherTimer profileRefreshTimer = new();
     private void MonitorG19Devices()
     {
@@ -114,10 +114,17 @@ public partial class MainWindow : Window
                                     case G19ProfileButton.MR:
                                         _macroRecording = !_macroRecording;
 
-                                        Debug.WriteLine(
-                                            _macroRecording
-                                                ? "Macro recording enabled"
-                                                : "Macro recording disabled");
+                                        if (_macroRecording)
+                                        {
+                                            Debug.WriteLine(
+                                                "Macro recording enabled");
+                                        }
+                                        else
+                                        {
+                                            Debug.WriteLine(
+                                                $"Macro recording disabled. " +
+                                                $"{_recordedKeys.Count} keys captured.");
+                                        }
 
                                         break;
                                 }
@@ -424,13 +431,13 @@ public partial class MainWindow : Window
             if (_macroRecording)
             {
                 _recordingTarget = gKeyName;
+                _recordedKeys.Clear();
 
                 Debug.WriteLine(
                     $"Recording macro for {gKeyName}");
 
                 return;
             }
-
             settings = SettingsManager.Load();
 
             var profile =
@@ -488,6 +495,17 @@ public partial class MainWindow : Window
         System.Windows.Input.KeyEventArgs e)
     {
         var key = GetRealKey(e);
+
+        if (_macroRecording &&
+            _recordingTarget != null)
+        {
+            _recordedKeys.Add(key);
+
+            Debug.WriteLine(
+                $"Captured {key} for {_recordingTarget}");
+
+            return;
+        }
 
         File.AppendAllText(
             "keytest.log",
