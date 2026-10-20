@@ -472,6 +472,20 @@ public partial class MainWindow : Window
                 return;
             }
 
+            if (gKey.MacroKeys.Count > 0)
+            {
+                Debug.WriteLine(
+                    $"Playing macro for {gKeyName}");
+
+                foreach (var keyName in gKey.MacroKeys)
+                {
+                    Debug.WriteLine(
+                        $"Replay: {keyName}");
+                }
+
+                return;
+            }
+
             switch (gKey.ActionType)
             {
                 case "Program":
