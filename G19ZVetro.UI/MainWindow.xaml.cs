@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private G19Service service;
     private AppSettings settings;
     private Forms.NotifyIcon trayIcon;
+    private bool _macroRecording;
     private readonly DispatcherTimer profileRefreshTimer = new();
     private void MonitorG19Devices()
     {
@@ -109,7 +110,13 @@ public partial class MainWindow : Window
                                         break;
 
                                     case G19ProfileButton.MR:
-                                        Debug.WriteLine("MR pressed");
+                                        _macroRecording = !_macroRecording;
+
+                                        Debug.WriteLine(
+                                            _macroRecording
+                                                ? "Macro recording enabled"
+                                                : "Macro recording disabled");
+
                                         break;
                                 }
                             }
