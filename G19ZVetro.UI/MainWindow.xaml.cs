@@ -21,6 +21,19 @@ public partial class MainWindow : Window
     private AppSettings settings;
     private Forms.NotifyIcon trayIcon;
     private readonly DispatcherTimer profileRefreshTimer = new();
+
+    private void LoadRefreshRate()
+    {
+        foreach (ComboBoxItem item in RefreshRateBox.Items)
+        {
+            if (item.Content?.ToString() ==
+                settings.RefreshRate.ToString())
+            {
+                RefreshRateBox.SelectedItem = item;
+                break;
+            }
+        }
+    }
     private void UpdateKeyboardStatus(bool connected)
     {
         KeyboardStatusText.Text =
@@ -111,25 +124,12 @@ public partial class MainWindow : Window
         M3BlueBox.Text =
             settings.Profiles["M3"].Blue.ToString();
 
-        UpdateActiveProfileDisplay();
-
-        var g1 = settings
-            .Profiles[settings.ActiveProfile]
-            .GKeys["G1"];
-
-        foreach (ComboBoxItem item in G1ActionTypeBox.Items)
-        {
-            if (item.Content?.ToString() == g1.ActionType)
-            {
-                G1ActionTypeBox.SelectedItem = item;
-                break;
-            }
-        }
-
-        G1ValueBox.Text = g1.Value;
         StartupBox.IsChecked =
             settings.StartWithWindows;
+
         UpdateKeyboardStatus(service.IsConnected);
+
+        RefreshProfileData();
 
         service.ConnectionChanged += connected =>
         {
@@ -366,6 +366,7 @@ public partial class MainWindow : Window
     private void RefreshProfileData()
     {
         settings = SettingsManager.Load();
+        LoadRefreshRate();
 
         UpdateActiveProfileDisplay();
 
@@ -514,9 +515,6 @@ public partial class MainWindow : Window
         M3RedBox.Text = settings.Profiles["M3"].Red.ToString();
         M3GreenBox.Text = settings.Profiles["M3"].Green.ToString();
         M3BlueBox.Text = settings.Profiles["M3"].Blue.ToString();
-
-        var activeProfile =
-            settings.Profiles[settings.ActiveProfile];
 
         SaveGKey("G1", G1ActionTypeBox, G1ValueBox);
         SaveGKey("G2", G2ActionTypeBox, G2ValueBox);
