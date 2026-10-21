@@ -69,6 +69,16 @@ public partial class MainWindow : Window
     {
         ProfileManager.SetActiveProfile(profile);
 
+        settings = SettingsManager.Load();
+
+        var activeProfile =
+            settings.Profiles[profile];
+
+        service.SetBacklightColor(
+            (byte)activeProfile.Red,
+            (byte)activeProfile.Green,
+            (byte)activeProfile.Blue);
+
         if (Dispatcher.CheckAccess())
         {
             RefreshProfileData();
@@ -147,6 +157,14 @@ public partial class MainWindow : Window
         service = ((App)System.Windows.Application.Current).Service;
 
         settings = SettingsManager.Load();
+
+        var activeProfile =
+            settings.Profiles[settings.ActiveProfile];
+
+        service.SetBacklightColor(
+            (byte)activeProfile.Red,
+            (byte)activeProfile.Green,
+            (byte)activeProfile.Blue);
 
         M1NameBox.Text =
             settings.Profiles["M1"].Name;
@@ -687,6 +705,15 @@ public partial class MainWindow : Window
         SaveGKey("G12", G12ActionTypeBox, G12ValueBox);
 
         SettingsManager.Save(settings);
+
+        var profile =
+            settings.Profiles[
+                settings.ActiveProfile];
+
+        service.SetBacklightColor(
+            (byte)profile.Red,
+            (byte)profile.Green,
+            (byte)profile.Blue);
 
         System.Windows.MessageBox.Show(
             "Settings saved.");

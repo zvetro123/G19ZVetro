@@ -23,14 +23,17 @@ namespace G19LCD
 
         private UsbDevice MyUsbDevice;
 
-        public void TestBacklight()
+        public void SetBacklightColor(
+            byte red,
+            byte green,
+            byte blue)
         {
             byte[] data =
             {
                 255,
-                255,
-                0,
-                0
+                red,
+                green,
+                blue
             };
 
             var packet = new UsbSetupPacket(
@@ -214,7 +217,6 @@ namespace G19LCD
             writer = MyUsbDevice.OpenEndpointWriter(WriteEndpointID.Ep02);
 
             StartButtonListener();
-            TestBacklight();
         }
 
         public void StartButtonListener()

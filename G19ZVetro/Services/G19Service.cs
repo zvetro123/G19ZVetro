@@ -1,6 +1,7 @@
 ﻿using G19LCD;
 using G19ZVetro.Rendering;
 using G19ZVetro.Telemetry;
+using HidSharp;
 using System.Drawing;
 using System.Threading;
 using System.Windows;
@@ -30,6 +31,19 @@ public class G19Service
         ConnectionChanged?.Invoke(connected);
     }
 
+    private G19LCD.LCD? _lcd;
+
+    public void SetBacklightColor(
+    byte red,
+    byte green,
+    byte blue)
+    {
+        _lcd?.SetBacklightColor(
+            red,
+            green,
+            blue);
+    }
+
     public void OnDeviceChange()
     {
         _deviceChanged = true;
@@ -45,19 +59,28 @@ public class G19Service
         {
             while (true)
             {
-                G19LCD.LCD? lcd = null;
+                _lcd = null;
 
                 try
                 {
-                    lcd = new G19LCD.LCD(1133, 49705);
+                    _lcd = new G19LCD.LCD(1133, 49705);
 
-                    _deviceChanged = false;
+                    _lcd.OpenDevice();
 
-                    lcd.OpenDevice();
+                    var settings = SettingsManager.Load();
+
+                    var profile =
+                        settings.Profiles[
+                            settings.ActiveProfile];
+
+                    SetBacklightColor(
+                        (byte)profile.Red,
+                        (byte)profile.Green,
+                        (byte)profile.Blue);
 
                     SetConnectionState(true);
 
-                    RunDisplayLoop(lcd);
+                    RunDisplayLoop(_lcd);
                 }
                 catch (Exception)
                 {
@@ -67,7 +90,7 @@ public class G19Service
                 {
                     try
                     {
-                        lcd?.CloseDevice();
+                        _lcd?.CloseDevice();
                     }
                     catch
                     {

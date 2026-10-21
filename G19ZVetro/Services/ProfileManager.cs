@@ -8,7 +8,8 @@ public static class ProfileManager
     {
         var settings = SettingsManager.Load();
 
-        return settings.Profiles[settings.ActiveProfile];
+        return settings.Profiles[
+            settings.ActiveProfile];
     }
 
     public static string GetActiveProfileId()
