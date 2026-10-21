@@ -54,6 +54,32 @@ namespace G19LCD
                 $"RGB success={success} bytes={transferred}");
         }
 
+        public void SetMKeyLeds(byte mask)
+        {
+            byte[] data =
+            {
+        0x10,
+        mask
+    };
+
+            var packet = new UsbSetupPacket(
+                0x21,
+                0x09,
+                0x0305,
+                0x01,
+                (short)data.Length);
+
+            bool success =
+                MyUsbDevice.ControlTransfer(
+                    ref packet,
+                    data,
+                    data.Length,
+                    out int transferred);
+
+            Debug.WriteLine(
+                $"MKEY success={success} bytes={transferred}");
+        }
+
         public UsbDeviceFinder MyUsbFinder;
 
         private int cPageIndex;

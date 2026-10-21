@@ -33,6 +33,11 @@ public class G19Service
 
     private G19LCD.LCD? _lcd;
 
+    public void SetMKeyLeds(byte mask)
+    {
+        _lcd?.SetMKeyLeds(mask);
+    }
+
     public void SetBacklightColor(
     byte red,
     byte green,
@@ -60,7 +65,7 @@ public class G19Service
             while (true)
             {
                 _lcd = null;
-
+                
                 try
                 {
                     _lcd = new G19LCD.LCD(1133, 49705);
@@ -77,6 +82,21 @@ public class G19Service
                         (byte)profile.Red,
                         (byte)profile.Green,
                         (byte)profile.Blue);
+
+                    switch (settings.ActiveProfile)
+                    {
+                        case "M1":
+                            SetMKeyLeds(0x80);
+                            break;
+
+                        case "M2":
+                            SetMKeyLeds(0x40);
+                            break;
+
+                        case "M3":
+                            SetMKeyLeds(0x20);
+                            break;
+                    }
 
                     SetConnectionState(true);
 
@@ -255,7 +275,31 @@ public class G19Service
                                 ProfileManager.SetActiveProfile("M3");
                                 break;
                         }
+                        settings = SettingsManager.Load();
 
+                        var profile =
+                            settings.Profiles[
+                                settings.ActiveProfile];
+
+                        SetBacklightColor(
+                            (byte)profile.Red,
+                            (byte)profile.Green,
+                            (byte)profile.Blue);
+
+                        switch (settings.ActiveProfile)
+                        {
+                            case "M1":
+                                SetMKeyLeds(0x80);
+                                break;
+
+                            case "M2":
+                                SetMKeyLeds(0x40);
+                                break;
+
+                            case "M3":
+                                SetMKeyLeds(0x20);
+                                break;
+                        }
                         settings = SettingsManager.Load();
 
                         profileIndex = settings.ActiveProfile switch

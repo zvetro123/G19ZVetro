@@ -42,6 +42,7 @@ public partial class MainWindow : Window
                 : "Keyboard Status: Not Detected";
     }
 
+
     protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
     {
         base.OnKeyDown(e);
@@ -78,6 +79,21 @@ public partial class MainWindow : Window
             (byte)activeProfile.Red,
             (byte)activeProfile.Green,
             (byte)activeProfile.Blue);
+
+        switch (profile)
+        {
+            case "M1":
+                service.SetMKeyLeds(0x80);
+                break;
+
+            case "M2":
+                service.SetMKeyLeds(0x40);
+                break;
+
+            case "M3":
+                service.SetMKeyLeds(0x20);
+                break;
+        }
 
         if (Dispatcher.CheckAccess())
         {
@@ -709,6 +725,21 @@ public partial class MainWindow : Window
         var profile =
             settings.Profiles[
                 settings.ActiveProfile];
+
+        switch (settings.ActiveProfile)
+        {
+            case "M1":
+                service.SetMKeyLeds(0x80);
+                break;
+
+            case "M2":
+                service.SetMKeyLeds(0x40);
+                break;
+
+            case "M3":
+                service.SetMKeyLeds(0x20);
+                break;
+        }
 
         service.SetBacklightColor(
             (byte)profile.Red,
