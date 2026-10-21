@@ -42,6 +42,25 @@ public partial class MainWindow : Window
                 : "Keyboard Status: Not Detected";
     }
 
+    private void UpdateMKeyLeds(bool recording = false)
+    {
+        byte mr = recording ? (byte)0x10 : (byte)0x00;
+
+        switch (settings.ActiveProfile)
+        {
+            case "M1":
+                service.SetMKeyLeds((byte)(0x80 | mr));
+                break;
+
+            case "M2":
+                service.SetMKeyLeds((byte)(0x40 | mr));
+                break;
+
+            case "M3":
+                service.SetMKeyLeds((byte)(0x20 | mr));
+                break;
+        }
+    }
 
     protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
     {
@@ -80,20 +99,7 @@ public partial class MainWindow : Window
             (byte)activeProfile.Green,
             (byte)activeProfile.Blue);
 
-        switch (profile)
-        {
-            case "M1":
-                service.SetMKeyLeds(0x80);
-                break;
-
-            case "M2":
-                service.SetMKeyLeds(0x40);
-                break;
-
-            case "M3":
-                service.SetMKeyLeds(0x20);
-                break;
-        }
+        UpdateMKeyLeds(_macroService.IsRecording);
 
         if (Dispatcher.CheckAccess())
         {
@@ -181,6 +187,8 @@ public partial class MainWindow : Window
             (byte)activeProfile.Red,
             (byte)activeProfile.Green,
             (byte)activeProfile.Blue);
+
+        UpdateMKeyLeds(false);
 
         M1NameBox.Text =
             settings.Profiles["M1"].Name;
@@ -396,35 +404,49 @@ public partial class MainWindow : Window
         {
             _macroService.StartRecording();
 
+            UpdateMKeyLeds(true);
+
             Debug.WriteLine(
                 "Macro recording enabled");
+
+            return;
         }
-        else
+
+        // User pressed MR again before choosing target
+        if (_macroService.RecordingTarget == null)
         {
-            if (_macroService.RecordingTarget != null)
-            {
-                settings = SettingsManager.Load();
+            _macroService.EndRecording();
 
-                var gKey =
-                    settings.Profiles[
-                        settings.ActiveProfile]
-                        .GKeys[
-                            _macroService.RecordingTarget];
+            UpdateMKeyLeds(false);
 
-                gKey.MacroKeys =
-                    _macroService.EndRecording();
+            Debug.WriteLine(
+                "Macro recording cancelled");
 
-                gKey.ActionType =
-                    "Recorded Macro";
-
-                gKey.Value = "";
-
-                SettingsManager.Save(settings);
-
-                Debug.WriteLine(
-                    $"Saved {gKey.MacroKeys.Count} keys");
-            }
+            return;
         }
+
+        settings = SettingsManager.Load();
+
+        var gKey =
+            settings.Profiles[
+                settings.ActiveProfile]
+                .GKeys[
+                    _macroService.RecordingTarget];
+
+        gKey.MacroKeys =
+            _macroService.EndRecording();
+
+        gKey.ActionType =
+            "Recorded Macro";
+
+        gKey.Value = "";
+
+        SettingsManager.Save(settings);
+
+        UpdateMKeyLeds(false);
+
+        Debug.WriteLine(
+            $"Saved {gKey.MacroKeys.Count} keys");
     }
 
     private void ExecuteGKey(string gKeyName)
@@ -722,29 +744,7 @@ public partial class MainWindow : Window
 
         SettingsManager.Save(settings);
 
-        var profile =
-            settings.Profiles[
-                settings.ActiveProfile];
-
-        switch (settings.ActiveProfile)
-        {
-            case "M1":
-                service.SetMKeyLeds(0x80);
-                break;
-
-            case "M2":
-                service.SetMKeyLeds(0x40);
-                break;
-
-            case "M3":
-                service.SetMKeyLeds(0x20);
-                break;
-        }
-
-        service.SetBacklightColor(
-            (byte)profile.Red,
-            (byte)profile.Green,
-            (byte)profile.Blue);
+        UpdateMKeyLeds(_macroService.IsRecording);
 
         System.Windows.MessageBox.Show(
             "Settings saved.");
