@@ -22,7 +22,35 @@ namespace G19LCD
         IUsbDevice wholeUsbDevice;
 
         private UsbDevice MyUsbDevice;
-        
+
+        public void TestBacklight()
+        {
+            byte[] data =
+            {
+                255,
+                255,
+                0,
+                0
+            };
+
+            var packet = new UsbSetupPacket(
+                0x21,
+                0x09,
+                0x0307,
+                0x01,
+                (short)data.Length);
+
+            bool success =
+                MyUsbDevice.ControlTransfer(
+                    ref packet,
+                    data,
+                    data.Length,
+                    out int transferred);
+
+            Debug.WriteLine(
+                $"RGB success={success} bytes={transferred}");
+        }
+
         public UsbDeviceFinder MyUsbFinder;
 
         private int cPageIndex;
@@ -186,6 +214,7 @@ namespace G19LCD
             writer = MyUsbDevice.OpenEndpointWriter(WriteEndpointID.Ep02);
 
             StartButtonListener();
+            TestBacklight();
         }
 
         public void StartButtonListener()
